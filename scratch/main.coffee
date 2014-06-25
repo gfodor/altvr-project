@@ -5,6 +5,23 @@ $("body").click ->
   element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock
   element.requestPointerLock()
 
+renderImage = (w, h, f) ->
+  canvas = document.createElement("canvas")
+  canvas.width = w
+  canvas.height = h
+  ctx = canvas.getContext('2d')
+  f(ctx)
+  image = new Image()
+  ctx.save()
+  image.src = canvas.toDataURL()
+  return image
+
+image = renderImage 500, 500, (ctx) ->
+  ctx.fillStyle = "#FFFFFF"
+  ctx.fillRect(0, 0, 500, 500)
+  ctx.fillStyle = "#FF0000"
+  ctx.fillRect(50, 50, 100, 100)
+
 scene = new t.Scene()
 camera = new t.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 )
 
@@ -22,7 +39,9 @@ light = new t.AmbientLight(0x202020)
 scene.add(light)
 
 geometry = new t.BoxGeometry(10,8,0.1)
-material = new t.MeshLambertMaterial( { color: 0xffffff } )
+texture = new t.Texture(image)
+texture.needsUpdate = true
+material = new t.MeshLambertMaterial( { map: texture } )
 cube = new t.Mesh( geometry, material )
 cube.position.y = 12
 cube.position.z = -10
@@ -50,4 +69,3 @@ render = ->
   renderer.render(scene, camera)
 
 render()
-
