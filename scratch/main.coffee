@@ -45,11 +45,12 @@ geometry = new t.BoxGeometry(13,8,0.1)
 texture = new t.Texture(image)
 texture.needsUpdate = true
 material = new t.MeshLambertMaterial( { map: texture } )
-cube = new t.Mesh( geometry, material )
-cube.position.y = 12
-cube.position.z = -10
-#scene.add( cube )
-scene.add( cube )
+board = new t.Mesh( geometry, material )
+board.position.y = 12
+board.position.z = -10
+scene.add( board )
+
+boards = [board]
 
 material = new t.MeshLambertMaterial( { map: t.ImageUtils.loadTexture("doge.jpeg") } )
 floor = new t.Mesh( new t.PlaneGeometry(100,100), material )
@@ -69,15 +70,22 @@ hud = new t.Mesh( new t.PlaneGeometry(5,5), material )
 hud.position.z = -10
 hudScene.add(hud)
 hudScene.add(hudCamera)
+foo = 0
 
 render = ->
   delta = clock.getDelta()
   controls.update(delta)
 
+  projector = new t.Projector()
+  ray = projector.pickingRay(new t.Vector3(0.0, 0.0, 0.0), camera)
+  isects = ray.intersectObjects(boards, false)
+
   requestAnimationFrame(render)
   renderer.autoClear = true
   renderer.render(scene, camera)
-  renderer.autoClear = false
-  renderer.render(hudScene, hudCamera)
+
+  if isects.length > 0
+    renderer.autoClear = false
+    renderer.render(hudScene, hudCamera)
 
 render()
