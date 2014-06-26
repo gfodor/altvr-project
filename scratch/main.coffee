@@ -1,9 +1,21 @@
 t = THREE
 
 $("body").click ->
-  element = $("body")[0]
-  element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock
-  element.requestPointerLock()
+
+pointerLocked = false
+pickedObject = null
+
+$(document).mousedown ->
+  unless pointerLocked
+    element = $("body")[0]
+    element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock
+    element.requestPointerLock()
+    pointerLocked = true
+  else
+    if pickedObject
+      clickedPoints.push [pickedObject.u, pickedObject.v]
+      updateBoards()
+
 
 renderImage = (w, h, f) ->
   canvas = document.createElement("canvas")
@@ -16,11 +28,9 @@ renderImage = (w, h, f) ->
   image.src = canvas.toDataURL()
   return image
 
-image = renderImage 500, 500, (ctx) ->
-  ctx.fillStyle = "#FFFFFF"
-  ctx.fillRect(0, 0, 500, 500)
-  ctx.fillStyle = "#FF0000"
-  ctx.fillRect(50, 50, 100, 100)
+clickedPoints = [[0.5, 0.5], [0.2, 0.3]]
+canvasWidth = 500
+canvasHeight = 500
 
 scene = new t.Scene()
 hudScene = new t.Scene()
@@ -42,9 +52,7 @@ light = new t.AmbientLight(0x202020)
 scene.add(light)
 
 geometry = new t.PlaneGeometry(13,8)
-texture = new t.Texture(image)
-texture.needsUpdate = true
-material = new t.MeshLambertMaterial( { map: texture } )
+material = new t.MeshLambertMaterial( { color: "#FFFFFF" } )
 board = new t.Mesh( geometry, material )
 board.position.y = 12
 board.position.z = -10
@@ -52,6 +60,24 @@ board.rotateOnAxis(new t.Vector3(0,1,0), 0.4)
 scene.add( board )
 
 boards = [board]
+
+updateBoards = ->
+  for board in boards
+    image = renderImage canvasWidth, canvasHeight, (ctx) ->
+      ctx.fillStyle = "#FFFFFF"
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+
+      _.each clickedPoints, (point) ->
+        ctx.fillStyle = "#FF0000"
+        ctx.fillRect(Math.floor(point[0] * canvasWidth), Math.floor(point[1] * canvasHeight), 10, 10)
+
+    texture = new t.Texture(image)
+    texture.needsUpdate = true
+    board.material.setValues(map: texture)
+    console.log(board)
+
+updateBoards()
+
 
 material = new t.MeshLambertMaterial( { map: t.ImageUtils.loadTexture("doge.jpeg") } )
 floor = new t.Mesh( new t.PlaneGeometry(100,100), material )
@@ -100,25 +126,30 @@ render = ->
   requestAnimationFrame(render)
   renderer.autoClear = true
   renderer.render(scene, camera)
+  pickedObject = null
 
   if isects.length > 0
     obj = isects[0].object
     uv = obj.geometry.faceVertexUvs[0][isects[0].faceIndex]
-    v1 = new t.Vector3()
-    v1.copy(obj.geometry.vertices[isects[0].face.a])
-    obj.localToWorld(v1)
-    v2 = new t.Vector3()
-    v2.copy(obj.geometry.vertices[isects[0].face.b])
-    obj.localToWorld(v2)
-    v3 = new t.Vector3()
-    v3.copy(obj.geometry.vertices[isects[0].face.c])
-    obj.localToWorld(v3)
 
-    [b1, b2, b3] = getBarycentricCoords(ray.ray, v1, v2, v3)
+    vertices = _.map ["a", "b", "c"], (faceName) ->
+      v = new t.Vector3()
+      v.copy(obj.geometry.vertices[isects[0].face[faceName]])
+      obj.localToWorld(v)
+      v
+
+    [b1, b2, b3] = getBarycentricCoords(ray.ray, vertices[0], vertices[1], vertices[2])
     u = b1 * uv[0].x + b2 * uv[1].x + b3 * uv[2].x
     v = b1 * uv[0].y + b2 * uv[1].y + b3 * uv[2].y
 
+    pickedObject =
+      object: isects[0].object
+      u: u,
+      v: 1.0 - v
+
     renderer.autoClear = false
     renderer.render(hudScene, hudCamera)
+  else
+    pickedObject = null
 
 render()
