@@ -41,13 +41,14 @@ scene.add(light)
 light = new t.AmbientLight(0x202020)
 scene.add(light)
 
-geometry = new t.BoxGeometry(13,8,0.1)
+geometry = new t.PlaneGeometry(13,8)
 texture = new t.Texture(image)
 texture.needsUpdate = true
 material = new t.MeshLambertMaterial( { map: texture } )
 board = new t.Mesh( geometry, material )
 board.position.y = 12
 board.position.z = -10
+board.rotateOnAxis(new t.Vector3(0,1,0), 0.4)
 scene.add( board )
 
 boards = [board]
@@ -70,7 +71,23 @@ hud = new t.Mesh( new t.PlaneGeometry(5,5), material )
 hud.position.z = -10
 hudScene.add(hud)
 hudScene.add(hudCamera)
-foo = 0
+foo = true
+
+getBarycentricCoords = (ray, p0, p1, p2) ->
+  e1 = new t.Vector3()
+  e1.subVectors(p1, p0)
+  e2 = new t.Vector3()
+  e2.subVectors(p2, p0)
+  s = new t.Vector3()
+  s.subVectors(ray.origin, p0)
+  s1 = new t.Vector3()
+  s1.crossVectors(ray.direction, e2)
+  s2 = new t.Vector3()
+  s2.crossVectors(s, e1)
+  divisor = s1.dot(e1)
+  b1 = s1.dot(s) / divisor
+  b2 = s2.dot(ray.direction) / divisor
+  [1.0 - b1 - b2, b1, b2]
 
 render = ->
   delta = clock.getDelta()
@@ -85,6 +102,22 @@ render = ->
   renderer.render(scene, camera)
 
   if isects.length > 0
+    obj = isects[0].object
+    uv = obj.geometry.faceVertexUvs[0][isects[0].faceIndex]
+    v1 = new t.Vector3()
+    v1.copy(obj.geometry.vertices[isects[0].face.a])
+    obj.localToWorld(v1)
+    v2 = new t.Vector3()
+    v2.copy(obj.geometry.vertices[isects[0].face.b])
+    obj.localToWorld(v2)
+    v3 = new t.Vector3()
+    v3.copy(obj.geometry.vertices[isects[0].face.c])
+    obj.localToWorld(v3)
+
+    [b1, b2, b3] = getBarycentricCoords(ray.ray, v1, v2, v3)
+    u = b1 * uv[0].x + b2 * uv[1].x + b3 * uv[2].x
+    v = b1 * uv[0].y + b2 * uv[1].y + b3 * uv[2].y
+
     renderer.autoClear = false
     renderer.render(hudScene, hudCamera)
 
