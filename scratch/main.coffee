@@ -29,8 +29,6 @@ renderImage = (w, h, f) ->
   return image
 
 clickedPoints = [[0.5, 0.5], [0.2, 0.3]]
-canvasWidth = 500
-canvasHeight = 500
 
 scene = new t.Scene()
 hudScene = new t.Scene()
@@ -53,31 +51,20 @@ scene.add(light)
 
 geometry = new t.PlaneGeometry(13,8)
 material = new t.MeshLambertMaterial( { color: "#FFFFFF" } )
-board = new t.Mesh( geometry, material )
-board.position.y = 12
-board.position.z = -10
-board.rotateOnAxis(new t.Vector3(0,1,0), 0.4)
-scene.add( board )
-
+board = new Board(scene, 13, 8, new t.Vector3(0, 12, -10), 0.1, 0.0)
 boards = [board]
 
 updateBoards = ->
   for board in boards
-    image = renderImage canvasWidth, canvasHeight, (ctx) ->
+    board.draw (ctx, width, height) ->
       ctx.fillStyle = "#FFFFFF"
-      ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+      ctx.fillRect(0, 0, width, height)
 
       _.each clickedPoints, (point) ->
         ctx.fillStyle = "#FF0000"
-        ctx.fillRect(Math.floor(point[0] * canvasWidth), Math.floor(point[1] * canvasHeight), 10, 10)
-
-    texture = new t.Texture(image)
-    texture.needsUpdate = true
-    board.material.setValues(map: texture)
-    console.log(board)
+        ctx.fillRect(Math.floor(point[0] * width), Math.floor(point[1] * height), 10, 10)
 
 updateBoards()
-
 
 material = new t.MeshLambertMaterial( { map: t.ImageUtils.loadTexture("doge.jpeg") } )
 floor = new t.Mesh( new t.PlaneGeometry(100,100), material )
@@ -121,7 +108,7 @@ render = ->
 
   projector = new t.Projector()
   ray = projector.pickingRay(new t.Vector3(0.0, 0.0, 0.0), camera)
-  isects = ray.intersectObjects(boards, false)
+  isects = ray.intersectObjects((_.map boards, (b) -> b.mesh), false)
 
   requestAnimationFrame(render)
   renderer.autoClear = true
