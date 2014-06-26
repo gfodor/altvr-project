@@ -1,0 +1,23 @@
+join
+  send: 
+    16 alphanumeric room name
+  recv:
+    other players
+    board state
+
+update board
+  array of board command changes
+
+room state changes
+  new board
+  board update
+
+board update
+  - server gen update id 64 bit
+  - room id 64 bit
+  - board id 64 bit
+  - local time offset 64 bit
+  - command 8 bit
+  - args
+  
+* keep board commands in sorted linked list, walk backwards from end and insert ahead of time

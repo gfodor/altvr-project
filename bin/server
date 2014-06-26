@@ -1,0 +1,10 @@
+#!/usr/bin/env node
+
+require("coffee-script");
+
+var sys = require('sys'),
+	Run = require('../lib/run.js');
+
+(new Run()).run()
+
+sys.puts("Server started.");

@@ -1,0 +1,43 @@
+{
+  "name": "altvr-server",
+  "version": "0.0.1",
+  "description": "3d room server",
+  "keywords": [
+    "doge"
+  ],
+  "homepage": "https://github.com/gfodor/altvr-project",
+  "author": {
+    "name": "Greg Fodor",
+    "email": "gfodor@gmail.com"
+  },
+  "dependencies": {
+    "semver": "~2",
+    "async": "~0.2",
+    "coffee-script": "~1.5.0",
+    "hat": "0.0.3",
+    "should": "~2.1.1",
+    "lodash": "~2.4.1",
+    "temp": "~0.6.0",
+    "mocha": "~1.16.2",
+    "assert": "~1.1.0",
+    "ws": "~0.4.31"
+  },
+  "engine": "node >= 0.10",
+  "main": "lib/index.js",
+  "bin": {
+    "server": "bin/server"
+  },
+  "scripts": {
+    "build": "make",
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/gfodor/altvr-project.git"
+  },
+  "readme": "",
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/gfodor/altvr-project/issues"
+  }
+}
