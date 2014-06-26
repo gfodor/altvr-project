@@ -12,7 +12,7 @@
     function Root(renderer, hud) {
       this.renderer = renderer;
       this.hud = hud;
-      this.protocol = ProtoBuf.loadProtoFile("./protocol.proto");
+      this.protocol = ProtoBuf.loadProtoFile("/protocol.proto");
       this.Commands = this.protocol.build("Commands");
       this.CommandType = this.protocol.build("CommandType");
       this.pickedObject = null;

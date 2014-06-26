@@ -4,7 +4,7 @@ class Root
   ProtoBuf = dcodeIO.ProtoBuf
 
   constructor: (@renderer, @hud) ->
-    @protocol = ProtoBuf.loadProtoFile("./protocol.proto")
+    @protocol = ProtoBuf.loadProtoFile("/protocol.proto")
     @Commands = @protocol.build("Commands")
     @CommandType = @protocol.build("CommandType")
 
