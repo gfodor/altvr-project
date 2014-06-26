@@ -7,25 +7,16 @@
     function CommandPump(protocol, socket) {
       this.protocol = protocol;
       this.socket = socket;
-      this.ready = false;
       this.PingCommand = this.protocol.build("Ping");
       this.Commands = this.protocol.build("Commands");
       this.Command = this.protocol.build("Command");
       this.CommandType = this.protocol.build("CommandType");
+      this.clockSkew = 0;
     }
 
-    CommandPump.prototype.init = function() {
-      var command;
-      command = new this.Command(this.CommandType.PING, 0, (new Date()).getTime(), 0);
-      command.ping = new this.PingCommand();
-      return this._send([command]);
-    };
+    CommandPump.prototype.init = function() {};
 
-    CommandPump.prototype.push = function(command) {
-      if (!this.ready) {
-
-      }
-    };
+    CommandPump.prototype.push = function(command) {};
 
     CommandPump.prototype._send = function(commands) {
       if (this.socket.readyState === WebSocket.OPEN) {

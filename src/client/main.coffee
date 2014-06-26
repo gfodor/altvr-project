@@ -5,7 +5,7 @@ renderer.setSize( window.innerWidth, window.innerHeight )
 document.body.appendChild( renderer.domElement )
 
 hud = new HUD()
-root = new Root(renderer, hud)
+root = new Root(renderer, hud, window._userId, window._roomId)
 root.attachEvents()
 root.connect()
 

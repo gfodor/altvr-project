@@ -9,11 +9,15 @@
 
     ProtoBuf = dcodeIO.ProtoBuf;
 
-    function Root(renderer, hud) {
+    function Root(renderer, hud, userId, roomId) {
       this.renderer = renderer;
       this.hud = hud;
+      this.userId = userId;
+      this.roomId = roomId;
       this.protocol = ProtoBuf.loadProtoFile("/protocol.proto");
       this.Commands = this.protocol.build("Commands");
+      this.Command = this.protocol.build("Command");
+      this.PingCommand = this.protocol.build("Ping");
       this.CommandType = this.protocol.build("CommandType");
       this.pickedObject = null;
       this.scene = new t.Scene();
@@ -34,9 +38,9 @@
       this.socket = new WebSocket("ws://altvr.lulcards.com:8001/ws");
       this.socket.binaryType = "arraybuffer";
       window.pp = this.protocol;
-      this.command_pump = new CommandPump(this.protocol, this.socket);
+      this.commandPump = new CommandPump(this.protocol, this.socket);
       this.socket.onopen = function() {
-        _this.command_pump.init();
+        _this.commandPump.init();
         return console.log("Connect");
       };
       this.socket.onclose = function() {
@@ -58,14 +62,16 @@
     Root.prototype.processIncomingCommand = function(command) {
       switch (command.type) {
         case this.CommandType.PING:
-          return this.processPong(command);
+          return this.processPing(command);
       }
     };
 
-    Root.prototype.processPong = function(command) {
-      var ping;
-      ping = command.ping;
-      return console.log("PONG " + command.timestamp + " " + ping.server_timestamp);
+    Root.prototype.processPing = function(command) {
+      var pong;
+      pong = new this.Command(command.type, this.userId, command.timestamp, this.roomId);
+      pong.ping = new this.PingCommand(new Date().getTime());
+      console.log("PING " + command.timestamp);
+      return this.commandPump._send([pong]);
     };
 
     Root.prototype.renderLoop = function() {

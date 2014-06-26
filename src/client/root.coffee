@@ -3,9 +3,11 @@ t = THREE
 class Root
   ProtoBuf = dcodeIO.ProtoBuf
 
-  constructor: (@renderer, @hud) ->
+  constructor: (@renderer, @hud, @userId, @roomId) ->
     @protocol = ProtoBuf.loadProtoFile("/protocol.proto")
     @Commands = @protocol.build("Commands")
+    @Command = @protocol.build("Command")
+    @PingCommand = @protocol.build("Ping")
     @CommandType = @protocol.build("CommandType")
 
     @pickedObject = null
@@ -24,10 +26,10 @@ class Root
     @socket = new WebSocket("ws://altvr.lulcards.com:8001/ws")
     @socket.binaryType = "arraybuffer"
     window.pp = @protocol
-    @command_pump = new CommandPump(@protocol, @socket)
+    @commandPump = new CommandPump(@protocol, @socket)
 
     @socket.onopen = =>
-      @command_pump.init()
+      @commandPump.init()
       console.log("Connect")
 
     @socket.onclose = =>
@@ -46,11 +48,13 @@ class Root
   processIncomingCommand: (command) ->
     switch command.type
       when @CommandType.PING
-        this.processPong(command)
+        this.processPing(command)
  
-  processPong: (command) ->
-    ping = command.ping
-    console.log "PONG #{command.timestamp} #{ping.server_timestamp}"
+  processPing: (command) ->
+    pong = new @Command(command.type, @userId, command.timestamp, @roomId)
+    pong.ping = new @PingCommand(new Date().getTime())
+    console.log "PING #{command.timestamp}"
+    @commandPump._send([pong])
 
   renderLoop: () ->
     U = window.U
