@@ -22,7 +22,8 @@
     "assert": "~1.1.0",
     "ws": "~0.4.31",
     "sinon": "~1.10.2",
-    "express": "~4.4.4"
+    "express": "~4.4.4",
+    "protobufjs": "~2.2.1"
   },
   "engine": "node >= 0.10",
   "main": "lib/index.js",

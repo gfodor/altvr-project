@@ -7,6 +7,7 @@ document.body.appendChild( renderer.domElement )
 hud = new HUD()
 root = new Root(renderer, hud)
 root.attachEvents()
+root.connect()
 
 room = new Room()
 room.addToScene(root.scene)

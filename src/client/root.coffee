@@ -1,7 +1,13 @@
 t = THREE
 
 class Root
+  ProtoBuf = dcodeIO.ProtoBuf
+
   constructor: (@renderer, @hud) ->
+    @protocol = ProtoBuf.loadProtoFile("./protocol.proto")
+    @Commands = @protocol.build("Commands")
+    @CommandType = @protocol.build("CommandType")
+
     @pickedObject = null
     @scene = new t.Scene()
     @camera = new t.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 )
@@ -13,6 +19,38 @@ class Root
 
   addBoard: (board) ->
     @boards.push(board)
+
+  connect: ->
+    @socket = new WebSocket("ws://altvr.lulcards.com:8001/ws")
+    @socket.binaryType = "arraybuffer"
+    window.pp = @protocol
+    @command_pump = new CommandPump(@protocol, @socket)
+
+    @socket.onopen = =>
+      @command_pump.init()
+      console.log("Connect")
+
+    @socket.onclose = =>
+      console.log "Disconnect"
+
+    @socket.onmessage = (e) =>
+      try
+        commands = @Commands.decode e.data
+
+        _.each commands.commands, (c) =>
+          this.processIncomingCommand c
+
+      catch err
+        console.log "error parsing #{err}"
+
+  processIncomingCommand: (command) ->
+    switch command.type
+      when @CommandType.PING
+        this.processPong(command)
+ 
+  processPong: (command) ->
+    ping = command.ping
+    console.log "PONG #{command.timestamp} #{ping.server_timestamp}"
 
   renderLoop: () ->
     U = window.U

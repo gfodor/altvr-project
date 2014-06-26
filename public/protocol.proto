@@ -1,3 +1,7 @@
+message Commands {
+  repeated Command commands = 1;
+}
+
 enum CommandType {
   JOIN = 0;
   BOARD_CREATE = 1;
@@ -47,6 +51,5 @@ message Erase {
 }
 
 message Ping {
-  required uint64 client_timestamp = 1;
-  optional uint64 server_timestamp = 2;
+  optional uint64 server_timestamp = 1;
 }

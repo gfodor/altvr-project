@@ -11,12 +11,12 @@ server:
 server-watch:
 	$(COFFEE) -c -w -o lib src/server
 
-#client:
-#	$(COFFEE) -c -o assets/javascripts src/client
-#
-#client-watch:
-#	$(COFFEE) -c -w -o assets/javascripts src/client
-#
+client:
+	$(COFFEE) -c -o public/js src/client
+
+client-watch:
+	$(COFFEE) -c -w -o public/js src/client
+
 clean:
 	rm -rf lib/*
 
