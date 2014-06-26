@@ -1,5 +1,6 @@
 message Commands {
   repeated Command commands = 1;
+  optional bool is_bootstrap = 2;
 }
 
 enum CommandType {
@@ -15,39 +16,35 @@ message Command {
   required uint64 user_id = 2;
   required uint64 timestamp = 3;
   required uint64 room_id = 4;
+  optional uint64 board_id = 5;
 
-  optional Join join = 5;
-  optional BoardCreate board_create = 6;
-  optional Draw draw = 7;
-  optional Erase erase = 8;
-  optional Ping ping = 9;
+  optional Join join = 6;
+  optional BoardCreate board_create = 7;
+  optional Draw draw = 8;
+  optional Erase erase = 9;
+  optional Ping ping = 10;
 }
 
 message Join {
-  required uint64 joined_user_id = 1;
 }
 
 message BoardCreate {
-  required uint64 board_id = 1;
-  required uint64 created_by_user_id = 2;
-  required float width = 3;
-  required float height = 4;
-  required float x = 5;
-  required float y = 6;
-  required float z = 7;
-  required float pitch = 8;
-  required float yaw = 9;
+  required float width = 1;
+  required float height = 2;
+  required float x = 3;
+  required float y = 4;
+  required float z = 5;
+  required float pitch = 6;
+  required float yaw = 7;
 }
 
 message Draw {
-  required uint64 board_id = 1;
-  required float x = 2;
-  required float y = 3;
-  required bool last = 4;
+  required float x = 1;
+  required float y = 2;
+  required bool last = 3;
 }
 
 message Erase {
-  required uint64 board_id = 1;
 }
 
 message Ping {

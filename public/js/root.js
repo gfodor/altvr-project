@@ -40,8 +40,11 @@
       window.pp = this.protocol;
       this.commandPump = new CommandPump(this.protocol, this.socket);
       this.socket.onopen = function() {
+        var joinCommand;
         _this.commandPump.init();
-        return console.log("Connect");
+        console.log("Connect");
+        joinCommand = _this.createCommand(_this.CommandType.JOIN);
+        return _this.commandPump._send([joinCommand]);
       };
       this.socket.onclose = function() {
         return console.log("Disconnect");
@@ -51,7 +54,7 @@
         try {
           commands = _this.Commands.decode(e.data);
           return _.each(commands.commands, function(c) {
-            return _this.processIncomingCommand(c);
+            return _this.processIncomingCommand(c, commands.is_bootstrap);
           });
         } catch (err) {
           return console.log("error parsing " + err);
@@ -59,7 +62,8 @@
       };
     };
 
-    Root.prototype.processIncomingCommand = function(command) {
+    Root.prototype.processIncomingCommand = function(command, isBootstrap) {
+      console.log(command);
       switch (command.type) {
         case this.CommandType.PING:
           return this.processPing(command);
@@ -72,6 +76,10 @@
       pong.ping = new this.PingCommand(new Date().getTime());
       console.log("PING " + command.timestamp);
       return this.commandPump._send([pong]);
+    };
+
+    Root.prototype.createCommand = function(type) {
+      return new this.Command(type, this.userId, (new Date()).getTime(), this.roomId);
     };
 
     Root.prototype.renderLoop = function() {

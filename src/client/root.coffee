@@ -31,6 +31,8 @@ class Root
     @socket.onopen = =>
       @commandPump.init()
       console.log("Connect")
+      joinCommand = this.createCommand(@CommandType.JOIN)
+      @commandPump._send([joinCommand])
 
     @socket.onclose = =>
       console.log "Disconnect"
@@ -40,21 +42,29 @@ class Root
         commands = @Commands.decode e.data
 
         _.each commands.commands, (c) =>
-          this.processIncomingCommand c
+          this.processIncomingCommand c, commands.is_bootstrap
 
       catch err
         console.log "error parsing #{err}"
 
-  processIncomingCommand: (command) ->
+  processIncomingCommand: (command, isBootstrap) ->
+    console.log(command)
+
     switch command.type
       when @CommandType.PING
         this.processPing(command)
  
   processPing: (command) ->
+    # Retain timestamp on message; this is the only server-timestamped message.
     pong = new @Command(command.type, @userId, command.timestamp, @roomId)
+
+    # Response includes client timestamp, for computing skew.
     pong.ping = new @PingCommand(new Date().getTime())
     console.log "PING #{command.timestamp}"
     @commandPump._send([pong])
+
+  createCommand: (type) ->
+    new @Command(type, @userId, (new Date()).getTime(), @roomId)
 
   renderLoop: () ->
     U = window.U
