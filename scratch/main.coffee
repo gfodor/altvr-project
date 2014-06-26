@@ -40,7 +40,7 @@ renderer = new t.WebGLRenderer()
 renderer.setSize( window.innerWidth, window.innerHeight )
 document.body.appendChild( renderer.domElement )
 
-light = new t.DirectionalLight(0xFFFFFF, 3)
+light = new t.DirectionalLight(0xFFFFFF, 1)
 #light = new t.Mesh( new t.BoxGeometry(2,1,2), new t.MeshLambertMaterial( { color: 0xff0000 } ))
 light.position.set(0.0, 20, 4)
 light.rotateOnAxis(new t.Vector3(1,0,0), - Math.PI * 0.15)
@@ -51,8 +51,14 @@ scene.add(light)
 
 geometry = new t.PlaneGeometry(13,8)
 material = new t.MeshLambertMaterial( { color: "#FFFFFF" } )
+
+boards = []
 board = new Board(scene, 13, 8, new t.Vector3(0, 12, -10), 0.1, 0.0)
-boards = [board]
+boards.push(board)
+board = new Board(scene, 13, 8, new t.Vector3(-14, 12, 5), Math.PI * 0.4, 0.4)
+boards.push(board)
+board = new Board(scene, 8, 5, new t.Vector3(14, 5, 5), -Math.PI * 0.4, -0.4)
+boards.push(board)
 
 updateBoards = ->
   for board in boards

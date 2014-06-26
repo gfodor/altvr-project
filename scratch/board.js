@@ -7,7 +7,7 @@
   Board = (function() {
 
     function Board(scene, width, height, position, yaw, pitch) {
-      var aspectRatio;
+      var aspectRatio, norm, normalMatrix;
       this.geometry = new t.PlaneGeometry(width, height);
       this.material = new t.MeshLambertMaterial({
         color: "#FFFFFF"
@@ -20,7 +20,18 @@
       aspectRatio = height * 1.0 / (width * 1.0);
       this.canvas.width = 1024;
       this.canvas.height = 1024.0 * aspectRatio;
+      this.light = new t.PointLight(0xFFFFFF, Math.floor(width * height / 10), 10);
+      this.light.position.copy(position);
       scene.add(this.mesh);
+      norm = new t.Vector3();
+      norm.copy(this.geometry.faces[0].normal);
+      this.mesh.updateMatrixWorld();
+      normalMatrix = new t.Matrix3();
+      normalMatrix.getNormalMatrix(this.mesh.matrixWorld);
+      norm.applyMatrix3(normalMatrix);
+      norm.multiplyScalar(3);
+      this.light.position.add(norm);
+      scene.add(this.light);
     }
 
     Board.prototype.draw = function(f) {

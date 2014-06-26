@@ -12,8 +12,19 @@ class Board
     aspectRatio = height * 1.0 / (width * 1.0)
     @canvas.width = 1024
     @canvas.height = 1024.0 * aspectRatio
-
+    @light = new t.PointLight(0xFFFFFF, Math.floor(width * height / 10), 10)
+    @light.position.copy(position)
     scene.add(@mesh)
+    norm = new t.Vector3()
+    norm.copy(@geometry.faces[0].normal)
+    @mesh.updateMatrixWorld()
+    normalMatrix = new t.Matrix3()
+    normalMatrix.getNormalMatrix(@mesh.matrixWorld)
+    norm.applyMatrix3(normalMatrix)
+    norm.multiplyScalar(3)
+    @light.position.add(norm)
+    scene.add(@light)
+
 
   draw: (f) ->
     ctx = @canvas.getContext('2d')

@@ -56,7 +56,7 @@
 
   document.body.appendChild(renderer.domElement);
 
-  light = new t.DirectionalLight(0xFFFFFF, 3);
+  light = new t.DirectionalLight(0xFFFFFF, 1);
 
   light.position.set(0.0, 20, 4);
 
@@ -74,9 +74,19 @@
     color: "#FFFFFF"
   });
 
+  boards = [];
+
   board = new Board(scene, 13, 8, new t.Vector3(0, 12, -10), 0.1, 0.0);
 
-  boards = [board];
+  boards.push(board);
+
+  board = new Board(scene, 13, 8, new t.Vector3(-14, 12, 5), Math.PI * 0.4, 0.4);
+
+  boards.push(board);
+
+  board = new Board(scene, 8, 5, new t.Vector3(14, 5, 5), -Math.PI * 0.4, -0.4);
+
+  boards.push(board);
 
   updateBoards = function() {
     var _i, _len, _results;
