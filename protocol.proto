@@ -1,0 +1,52 @@
+enum CommandType {
+  JOIN = 0;
+  BOARD_CREATE = 1;
+  DRAW = 2;
+  ERASE = 3;
+  PING = 4;
+}
+
+message Command {
+  required CommandType type = 1;
+  required uint64 user_id = 2;
+  required uint64 timestamp = 3;
+  required uint64 room_id = 4;
+
+  optional Join join = 5;
+  optional BoardCreate board_create = 6;
+  optional Draw draw = 7;
+  optional Erase erase = 8;
+  optional Ping ping = 9;
+}
+
+message Join {
+  required uint64 joined_user_id = 1;
+}
+
+message BoardCreate {
+  required uint64 board_id = 1;
+  required uint64 created_by_user_id = 2;
+  required float width = 3;
+  required float height = 4;
+  required float x = 5;
+  required float y = 6;
+  required float z = 7;
+  required float pitch = 8;
+  required float yaw = 9;
+}
+
+message Draw {
+  required uint64 board_id = 1;
+  required float x = 2;
+  required float y = 3;
+  required bool last = 4;
+}
+
+message Erase {
+  required uint64 board_id = 1;
+}
+
+message Ping {
+  required uint64 client_timestamp = 1;
+  optional uint64 server_timestamp = 2;
+}

@@ -3,8 +3,18 @@
 require("coffee-script");
 
 var sys = require('sys'),
-	Run = require('../lib/run.js');
+	altvr = require('../src/server');
 
-(new Run()).run()
+var rest_port = 8000;
+var game_port = 8001;
+var flash_port = 843;
 
-sys.puts("Server started.");
+altvr.rest_server.listen(rest_port);
+altvr.game_server.listen(game_port);
+altvr.flash_server.listen(flash_port);
+
+sys.log("Listening on " + rest_port + "/" + game_port + "/" + flash_port + ".");
+
+process.setuid("nobody");
+
+sys.log("Server started.");

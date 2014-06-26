@@ -20,7 +20,9 @@
     "temp": "~0.6.0",
     "mocha": "~1.16.2",
     "assert": "~1.1.0",
-    "ws": "~0.4.31"
+    "ws": "~0.4.31",
+    "sinon": "~1.10.2",
+    "express": "~4.4.4"
   },
   "engine": "node >= 0.10",
   "main": "lib/index.js",
