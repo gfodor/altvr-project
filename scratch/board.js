@@ -6,9 +6,11 @@
 
   Board = (function() {
 
-    function Board(scene, width, height, position, yaw, pitch) {
-      var aspectRatio, norm, normalMatrix;
-      this.geometry = new t.PlaneGeometry(width, height);
+    function Board(width, height, position, yaw, pitch) {
+      var aspectRatio;
+      this.width = width;
+      this.height = height;
+      this.geometry = new t.PlaneGeometry(this.width, this.height);
       this.material = new t.MeshLambertMaterial({
         color: "#FFFFFF"
       });
@@ -17,11 +19,21 @@
       this.mesh.rotateOnAxis(new t.Vector3(0, 1, 0), yaw);
       this.mesh.rotateOnAxis(new t.Vector3(1, 0, 0), pitch);
       this.canvas = document.createElement("canvas");
-      aspectRatio = height * 1.0 / (width * 1.0);
+      aspectRatio = this.height * 1.0 / (this.width * 1.0);
       this.canvas.width = 1024;
       this.canvas.height = 1024.0 * aspectRatio;
-      this.light = new t.PointLight(0xFFFFFF, Math.floor(width * height / 10), 10);
-      this.light.position.copy(position);
+      true;
+    }
+
+    Board.prototype.addToScene = function(scene) {
+      scene.add(this.mesh);
+      return this.createPointLight(scene);
+    };
+
+    Board.prototype.createPointLight = function(scene) {
+      var norm, normalMatrix;
+      this.light = new t.PointLight(0xFFFFFF, Math.floor(this.width * this.height / 10), 10);
+      this.light.position.copy(this.mesh.position);
       scene.add(this.mesh);
       norm = new t.Vector3();
       norm.copy(this.geometry.faces[0].normal);
@@ -31,8 +43,8 @@
       norm.applyMatrix3(normalMatrix);
       norm.multiplyScalar(3);
       this.light.position.add(norm);
-      scene.add(this.light);
-    }
+      return scene.add(this.light);
+    };
 
     Board.prototype.draw = function(f) {
       var ctx, image, texture;
