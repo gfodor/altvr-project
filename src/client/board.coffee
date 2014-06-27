@@ -79,8 +79,7 @@ class Board
     ctx = @canvas.getContext('2d')
     image = new Image()
     ctx.save()
-    image.src = @canvas.toDataURL()
-    texture = new t.Texture(image)
+    texture = new t.Texture(ctx.getImageData(0, 0, @canvas.width, @canvas.height))
     texture.needsUpdate = true
     @material.setValues(map: texture)
 

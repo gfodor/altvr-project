@@ -90,6 +90,7 @@ class CommandHandler
 
                 ctx.stroke()
 
-          board.refresh() if localExecution
+          if localExecution
+            board.refresh()
 
 window.CommandHandler = CommandHandler

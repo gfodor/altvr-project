@@ -82,8 +82,7 @@
       ctx = this.canvas.getContext('2d');
       image = new Image();
       ctx.save();
-      image.src = this.canvas.toDataURL();
-      texture = new t.Texture(image);
+      texture = new t.Texture(ctx.getImageData(0, 0, this.canvas.width, this.canvas.height));
       texture.needsUpdate = true;
       return this.material.setValues({
         map: texture

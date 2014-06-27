@@ -5,7 +5,7 @@
   CommandPump = (function() {
     var ENQUEUE_RATE_LIMIT, FLUSH_RATE;
 
-    ENQUEUE_RATE_LIMIT = 50;
+    ENQUEUE_RATE_LIMIT = 25;
 
     FLUSH_RATE = 500;
 
