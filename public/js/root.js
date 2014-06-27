@@ -60,11 +60,13 @@
     };
 
     Root.prototype.processIncomingCommand = function(command, isBootstrap) {
+      var requiresServer;
       switch (command.type) {
         case this.CommandType.PING:
           return this.processPing(command);
         default:
-          if (isBootstrap || command.user_id !== this.userId) {
+          requiresServer = U.requiresServerResponse(this.CommandType, command);
+          if (isBootstrap || requiresServer || command.user_id !== this.userId) {
             return this.commandHandler.executeCommand(command);
           } else {
 
@@ -163,9 +165,9 @@
       command.board_create = new this.BoardCreateCommand();
       command.board_create.width = 13;
       command.board_create.height = 8;
-      command.board_create.x = 0;
-      command.board_create.y = 12;
-      command.board_create.z = -10;
+      command.board_create.x = this.controls.getObject().position.x;
+      command.board_create.y = this.controls.getObject().position.y;
+      command.board_create.z = this.controls.getObject().position.z;
       command.board_create.pitch = 0.1;
       command.board_create.yaw = 0.1;
       return this.commandPump.push(command, true);

@@ -7,7 +7,6 @@ class CommandPump
     @Commands = @protocol.build("Commands")
     @Command = @protocol.build("Command")
     @CommandType = @protocol.build("CommandType")
-    @clockSkew = 0
     @pendingCommands = []
     @lastEnqueueTime = 0
     @lastFlushTime = 0
@@ -23,7 +22,9 @@ class CommandPump
       # Enqueue it for the server to receive it, and execute it locally
       @lastEnqueueTime = now
       @pendingCommands.push command
-      @handler.executeCommand command
+
+      unless U.requiresServerResponse(@CommandType, command)
+        @handler.executeCommand command
 
     if force
       this.flush()

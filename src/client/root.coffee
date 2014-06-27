@@ -52,7 +52,9 @@ class Root
       else
         # Skip incoming commands that we performed since bootstrap period,
         # since (for now) these are always broadcast to the entire room.
-        if isBootstrap || command.user_id != @userId
+        requiresServer = U.requiresServerResponse(@CommandType, command)
+
+        if isBootstrap || requiresServer || command.user_id != @userId
           @commandHandler.executeCommand(command)
         else
           # Echo
@@ -141,9 +143,9 @@ class Root
     command.board_create = new @BoardCreateCommand()
     command.board_create.width = 13
     command.board_create.height = 8
-    command.board_create.x = 0
-    command.board_create.y = 12
-    command.board_create.z = -10
+    command.board_create.x = @controls.getObject().position.x
+    command.board_create.y = @controls.getObject().position.y
+    command.board_create.z = @controls.getObject().position.z
     command.board_create.pitch = 0.1
     command.board_create.yaw = 0.1
     @commandPump.push(command, true)

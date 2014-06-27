@@ -1,7 +1,7 @@
 t = THREE
 
 class Board
-  constructor: (@width, @height, position, yaw, pitch) ->
+  constructor: (@id, @width, @height, position, yaw, pitch) ->
     @geometry = new t.PlaneGeometry(@width, @height)
     @material = new t.MeshLambertMaterial( { color: "#FFFFFF" } )
     @mesh = new t.Mesh( @geometry, @material )

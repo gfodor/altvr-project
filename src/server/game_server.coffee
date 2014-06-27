@@ -16,6 +16,8 @@ class GameServer
     @PingCommand = @protocol.build("Ping")
     @CommandType = @protocol.build("CommandType")
 
+    @lastId = 10000 * 13 * 13 * 13
+
     @rooms = {}
     @userData = {}
     @userSockets = {}
@@ -59,7 +61,6 @@ class GameServer
           _.each commands.commands, (command) =>
             this.processIncomingCommand(socket, command)
 
-
   pingConnectedClients: ->
     for socket in @allSockets
       this.pingClient(socket)
@@ -85,10 +86,6 @@ class GameServer
         if userData? && userData.latency?
           command.timestamp += (new Date()).getTime() - userData.latency
 
-        switch command.type
-          when @CommandType.JOIN
-            this.processJoin(socket, command)
-
         if command.board_id?
           board = this.boardDataForBoardId(command.board_id, roomData.roomId)
 
@@ -96,6 +93,13 @@ class GameServer
             board.commands.push command
         else
           roomData.commands.push command
+
+        switch command.type
+          when @CommandType.JOIN
+            this.processJoin(socket, command)
+          when @CommandType.BOARD_CREATE
+            # Generate an artificial board ID
+            command.board_id = this.genId()
 
         this.broadcastCommandToRoom(command, roomData.roomId)
 
@@ -203,5 +207,10 @@ class GameServer
     userData = this.userDataForUserId(message.user_id)
     roomData = this.roomDataForRoomId(message.room_id)
     callback(roomData, userData)
+
+  # Fake ID generator, in the real world we'd use a database or something.
+  genId: ->
+    @lastId += 13 + Math.floor(Math.random() * 1024)
+
 
 module.exports = new GameServer()

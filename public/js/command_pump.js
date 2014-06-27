@@ -18,7 +18,6 @@
       this.Commands = this.protocol.build("Commands");
       this.Command = this.protocol.build("Command");
       this.CommandType = this.protocol.build("CommandType");
-      this.clockSkew = 0;
       this.pendingCommands = [];
       this.lastEnqueueTime = 0;
       this.lastFlushTime = 0;
@@ -33,7 +32,9 @@
       if (shouldEnqueue) {
         this.lastEnqueueTime = now;
         this.pendingCommands.push(command);
-        this.handler.executeCommand(command);
+        if (!U.requiresServerResponse(this.CommandType, command)) {
+          this.handler.executeCommand(command);
+        }
       }
       if (force) {
         return this.flush();

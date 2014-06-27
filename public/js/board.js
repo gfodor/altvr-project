@@ -6,8 +6,9 @@
 
   Board = (function() {
 
-    function Board(width, height, position, yaw, pitch) {
+    function Board(id, width, height, position, yaw, pitch) {
       var aspectRatio;
+      this.id = id;
       this.width = width;
       this.height = height;
       this.geometry = new t.PlaneGeometry(this.width, this.height);

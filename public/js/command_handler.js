@@ -17,11 +17,13 @@
     }
 
     CommandHandler.prototype.executeCommand = function(command) {
-      var board, height, pitch, width, x, y, yaw, z, _ref;
+      var board, board_id, height, pitch, width, x, y, yaw, z, _ref;
       switch (command.type) {
         case this.CommandType.BOARD_CREATE:
           _ref = command.board_create, width = _ref.width, height = _ref.height, x = _ref.x, y = _ref.y, z = _ref.z, pitch = _ref.pitch, yaw = _ref.yaw;
-          board = new Board(width, height, new t.Vector3(x, y, z), pitch, yaw);
+          board_id = command.board_id;
+          console.log("create board " + board_id);
+          board = new Board(board_id, width, height, new t.Vector3(x, y, z), pitch, yaw);
           board.addToScene(this.root.scene);
           return this.root.addBoard(board);
       }

@@ -6,6 +6,13 @@
 
   window.U = U = {};
 
+  U.requiresServerResponse = function(commandType, command) {
+    if (command.type === commandType.BOARD_CREATE) {
+      return true;
+    }
+    return false;
+  };
+
   U.getBarycentricCoords = function(ray, p0, p1, p2) {
     var b1, b2, divisor, e1, e2, s, s1, s2;
     e1 = new t.Vector3();
