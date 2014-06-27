@@ -3,20 +3,65 @@
   var CommandPump;
 
   CommandPump = (function() {
+    var ENQUEUE_RATE_LIMIT, FLUSH_RATE;
 
-    function CommandPump(protocol, socket) {
+    ENQUEUE_RATE_LIMIT = 50;
+
+    FLUSH_RATE = 250;
+
+    function CommandPump(protocol, socket, handler) {
+      var _this = this;
       this.protocol = protocol;
       this.socket = socket;
+      this.handler = handler;
       this.PingCommand = this.protocol.build("Ping");
       this.Commands = this.protocol.build("Commands");
       this.Command = this.protocol.build("Command");
       this.CommandType = this.protocol.build("CommandType");
       this.clockSkew = 0;
+      this.pendingCommands = [];
+      this.lastEnqueueTime = 0;
+      this.lastFlushTime = 0;
+      setInterval((function() {
+        return _this.flushIfReady();
+      }), 50);
     }
 
-    CommandPump.prototype.init = function() {};
+    CommandPump.prototype.push = function(command, force) {
+      var now, shouldEnqueue;
+      now = ((new Date()).getTime(), shouldEnqueue = force || now - this.lastEnqueueTime) > ENQUEUE_RATE_LIMIT;
+      if (shouldEnqueue) {
+        this.lastEnqueueTime = now;
+        this.pendingCommands.push(command);
+        this.handler.executeCommand(command);
+      }
+      if (force) {
+        return this.flush();
+      } else {
+        return this.flushIfReady();
+      }
+    };
 
-    CommandPump.prototype.push = function(command) {};
+    CommandPump.prototype.flushIfReady = function() {
+      if (!(this.pendingCommands.length > 0)) {
+        return;
+      }
+      if (((new Date()).getTime() - this.lastFlushTime) > FLUSH_RATE) {
+        return this.flush();
+      }
+    };
+
+    CommandPump.prototype.flush = function() {
+      if (!(this.pendingCommands.length > 0)) {
+        return;
+      }
+      if (this.socket.readyState !== WebSocket.OPEN) {
+        return;
+      }
+      this.lastFlushTime = (new Date()).getTime();
+      this._send(this.pendingCommands);
+      return this.pendingCommands = [];
+    };
 
     CommandPump.prototype._send = function(commands) {
       if (this.socket.readyState === WebSocket.OPEN) {

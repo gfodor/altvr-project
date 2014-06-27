@@ -18,6 +18,7 @@
       this.Commands = this.protocol.build("Commands");
       this.Command = this.protocol.build("Command");
       this.PingCommand = this.protocol.build("Ping");
+      this.BoardCreateCommand = this.protocol.build("BoardCreate");
       this.CommandType = this.protocol.build("CommandType");
       this.pickedObject = null;
       this.scene = new t.Scene();
@@ -38,10 +39,10 @@
       this.socket = new WebSocket("ws://altvr.lulcards.com:8001/ws");
       this.socket.binaryType = "arraybuffer";
       window.pp = this.protocol;
-      this.commandPump = new CommandPump(this.protocol, this.socket);
+      this.commandHandler = new CommandHandler(this);
+      this.commandPump = new CommandPump(this.protocol, this.socket, this.commandHandler);
       this.socket.onopen = function() {
         var joinCommand;
-        _this.commandPump.init();
         console.log("Connect");
         joinCommand = _this.createCommand(_this.CommandType.JOIN);
         return _this.commandPump._send([joinCommand]);
@@ -51,22 +52,23 @@
       };
       return this.socket.onmessage = function(e) {
         var commands;
-        try {
-          commands = _this.Commands.decode(e.data);
-          return _.each(commands.commands, function(c) {
-            return _this.processIncomingCommand(c, commands.is_bootstrap);
-          });
-        } catch (err) {
-          return console.log("error parsing " + err);
-        }
+        commands = _this.Commands.decode(e.data);
+        return _.each(commands.commands, function(c) {
+          return _this.processIncomingCommand(c, commands.is_bootstrap);
+        });
       };
     };
 
     Root.prototype.processIncomingCommand = function(command, isBootstrap) {
-      console.log(command);
       switch (command.type) {
         case this.CommandType.PING:
           return this.processPing(command);
+        default:
+          if (isBootstrap || command.user_id !== this.userId) {
+            return this.commandHandler.executeCommand(command);
+          } else {
+
+          }
       }
     };
 
@@ -76,10 +78,6 @@
       pong.ping = new this.PingCommand(new Date().getTime());
       console.log("PING " + command.timestamp);
       return this.commandPump._send([pong]);
-    };
-
-    Root.prototype.createCommand = function(type) {
-      return new this.Command(type, this.userId, (new Date()).getTime(), this.roomId);
     };
 
     Root.prototype.renderLoop = function() {
@@ -127,6 +125,9 @@
     Root.prototype.attachEvents = function() {
       var _this = this;
       this.setupPointerLockHandler();
+      $(document).keypress(function(e) {
+        return _this.handleKeyPress(e.which);
+      });
       return $(document).mousedown(function() {});
     };
 
@@ -153,6 +154,32 @@
       var el;
       el = $("body")[0];
       return document.pointerLockElement === el || document.mozPointerLockElement === el || document.webkitPointerLockElement === el;
+    };
+
+    Root.prototype.pushCreateBoardCommand = function() {
+      var command;
+      console.log("create board");
+      command = this.createCommand(this.CommandType.BOARD_CREATE);
+      command.board_create = new this.BoardCreateCommand();
+      command.board_create.width = 13;
+      command.board_create.height = 8;
+      command.board_create.x = 0;
+      command.board_create.y = 12;
+      command.board_create.z = -10;
+      command.board_create.pitch = 0.1;
+      command.board_create.yaw = 0.1;
+      return this.commandPump.push(command, true);
+    };
+
+    Root.prototype.handleKeyPress = function(keyCode) {
+      switch (keyCode) {
+        case 98:
+          return this.pushCreateBoardCommand();
+      }
+    };
+
+    Root.prototype.createCommand = function(type) {
+      return new this.Command(type, this.userId, (new Date()).getTime(), this.roomId);
     };
 
     return Root;

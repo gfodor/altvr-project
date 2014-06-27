@@ -8,6 +8,7 @@ class Root
     @Commands = @protocol.build("Commands")
     @Command = @protocol.build("Command")
     @PingCommand = @protocol.build("Ping")
+    @BoardCreateCommand = @protocol.build("BoardCreate")
     @CommandType = @protocol.build("CommandType")
 
     @pickedObject = null
@@ -26,10 +27,11 @@ class Root
     @socket = new WebSocket("ws://altvr.lulcards.com:8001/ws")
     @socket.binaryType = "arraybuffer"
     window.pp = @protocol
-    @commandPump = new CommandPump(@protocol, @socket)
+
+    @commandHandler = new CommandHandler(this)
+    @commandPump = new CommandPump(@protocol, @socket, @commandHandler)
 
     @socket.onopen = =>
-      @commandPump.init()
       console.log("Connect")
       joinCommand = this.createCommand(@CommandType.JOIN)
       @commandPump._send([joinCommand])
@@ -38,21 +40,22 @@ class Root
       console.log "Disconnect"
 
     @socket.onmessage = (e) =>
-      try
-        commands = @Commands.decode e.data
+      commands = @Commands.decode e.data
 
-        _.each commands.commands, (c) =>
-          this.processIncomingCommand c, commands.is_bootstrap
-
-      catch err
-        console.log "error parsing #{err}"
+      _.each commands.commands, (c) =>
+        this.processIncomingCommand c, commands.is_bootstrap
 
   processIncomingCommand: (command, isBootstrap) ->
-    console.log(command)
-
     switch command.type
       when @CommandType.PING
         this.processPing(command)
+      else
+        # Skip incoming commands that we performed since bootstrap period,
+        # since (for now) these are always broadcast to the entire room.
+        if isBootstrap || command.user_id != @userId
+          @commandHandler.executeCommand(command)
+        else
+          # Echo
  
   processPing: (command) ->
     # Retain timestamp on message; this is the only server-timestamped message.
@@ -62,9 +65,6 @@ class Root
     pong.ping = new @PingCommand(new Date().getTime())
     console.log "PING #{command.timestamp}"
     @commandPump._send([pong])
-
-  createCommand: (type) ->
-    new @Command(type, @userId, (new Date()).getTime(), @roomId)
 
   renderLoop: () ->
     U = window.U
@@ -109,6 +109,9 @@ class Root
   attachEvents: ->
     this.setupPointerLockHandler()
 
+    $(document).keypress (e) =>
+      this.handleKeyPress(e.which)
+
     $(document).mousedown =>
       #unless this.isPointerLocked()
         #if pickedObject
@@ -131,6 +134,29 @@ class Root
   isPointerLocked: ->
     el = $("body")[0]
     document.pointerLockElement == el || document.mozPointerLockElement == el || document.webkitPointerLockElement == el
+
+  pushCreateBoardCommand: ->
+    console.log("create board")
+    command = this.createCommand(@CommandType.BOARD_CREATE)
+    command.board_create = new @BoardCreateCommand()
+    command.board_create.width = 13
+    command.board_create.height = 8
+    command.board_create.x = 0
+    command.board_create.y = 12
+    command.board_create.z = -10
+    command.board_create.pitch = 0.1
+    command.board_create.yaw = 0.1
+    @commandPump.push(command, true)
+
+  handleKeyPress: (keyCode) ->
+    switch keyCode
+      when 98 # B, create board
+        this.pushCreateBoardCommand()
+
+#board = new Board(13, 8, new t.Vector3(0, 12, -10), 0.1, 0.0)
+
+  createCommand: (type) ->
+    new @Command(type, @userId, (new Date()).getTime(), @roomId)
 
 #updateBoards = ->
 #  for board in boards
