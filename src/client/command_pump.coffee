@@ -1,5 +1,5 @@
 class CommandPump
-  ENQUEUE_RATE_LIMIT = 50
+  ENQUEUE_RATE_LIMIT = 25
   FLUSH_RATE = 250
 
   constructor: (@protocol, @socket, @handler) ->
@@ -13,10 +13,10 @@ class CommandPump
     setInterval((=> this.flushIfReady()), 50)
 
   push: (command, force) ->
-    now = ((new Date()).getTime()
+    now = (new Date()).getTime()
 
     # Enqueue it if we are seeing too many non-forced events (like cursor tracking)
-    shouldEnqueue = force || now - @lastEnqueueTime) > ENQUEUE_RATE_LIMIT
+    shouldEnqueue = force || (now - @lastEnqueueTime) > ENQUEUE_RATE_LIMIT
 
     if shouldEnqueue
       # Enqueue it for the server to receive it, and execute it locally

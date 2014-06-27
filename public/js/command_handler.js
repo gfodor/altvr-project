@@ -25,6 +25,8 @@
           board = new Board(board_id, width, height, new t.Vector3(x, y, z), yaw, pitch);
           board.addToScene(this.root.scene);
           return this.root.addBoard(board);
+        case this.CommandType.DRAW:
+          return console.log("draw: " + command.user_id + " " + command.board_id + " " + command.draw.x + " " + command.draw.y + " " + command.draw.end_stroke);
       }
     };
 

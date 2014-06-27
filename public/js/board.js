@@ -20,6 +20,7 @@
       this.mesh.rotateOnAxis(axis, pitch);
       this.mesh.rotateOnAxis(new t.Vector3(0, 1, 0), yaw);
       this.mesh.position.copy(position);
+      this.mesh.__board = this;
       this.canvas = document.createElement("canvas");
       aspectRatio = this.height * 1.0 / (this.width * 1.0);
       this.canvas.width = 1024;

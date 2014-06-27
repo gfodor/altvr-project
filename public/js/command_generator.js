@@ -11,6 +11,7 @@
       this.protocol = protocol;
       this.CommandType = this.protocol.build("CommandType");
       this.Command = this.protocol.build("Command");
+      this.DrawCommand = this.protocol.build("Draw");
       this.BoardCreateCommand = this.protocol.build("BoardCreate");
     }
 
@@ -20,6 +21,20 @@
 
     CommandGenerator.prototype.generateJoin = function() {
       return this.createCommand(this.CommandType.JOIN);
+    };
+
+    CommandGenerator.prototype.generateDraw = function(pickedObject, drawState) {
+      var board, command, endStroke;
+      command = this.createCommand(this.CommandType.DRAW);
+      if (pickedObject.object.__board != null) {
+        board = pickedObject.object.__board;
+        command.board_id = board.id;
+        endStroke = drawState === U.DRAW_STATE_END;
+        command.draw = new this.DrawCommand(pickedObject.u, pickedObject.v, endStroke);
+        return command;
+      } else {
+        return false;
+      }
     };
 
     CommandGenerator.prototype.generateCreateBoard = function() {

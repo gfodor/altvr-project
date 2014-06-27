@@ -6,6 +6,14 @@
 
   window.U = U = {};
 
+  U.DRAW_STATE_NONE = 0;
+
+  U.DRAW_STATE_START = 1;
+
+  U.DRAW_STATE_DURING = 2;
+
+  U.DRAW_STATE_END = 3;
+
   U.requiresServerResponse = function(commandType, command) {
     if (command.type === commandType.BOARD_CREATE) {
       return true;

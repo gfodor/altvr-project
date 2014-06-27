@@ -5,7 +5,7 @@
   CommandPump = (function() {
     var ENQUEUE_RATE_LIMIT, FLUSH_RATE;
 
-    ENQUEUE_RATE_LIMIT = 50;
+    ENQUEUE_RATE_LIMIT = 25;
 
     FLUSH_RATE = 250;
 
@@ -28,7 +28,8 @@
 
     CommandPump.prototype.push = function(command, force) {
       var now, shouldEnqueue;
-      now = ((new Date()).getTime(), shouldEnqueue = force || now - this.lastEnqueueTime) > ENQUEUE_RATE_LIMIT;
+      now = (new Date()).getTime();
+      shouldEnqueue = force || (now - this.lastEnqueueTime) > ENQUEUE_RATE_LIMIT;
       if (shouldEnqueue) {
         this.lastEnqueueTime = now;
         this.pendingCommands.push(command);

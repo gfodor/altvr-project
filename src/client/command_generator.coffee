@@ -4,6 +4,7 @@ class CommandGenerator
   constructor: (@root, @protocol) ->
     @CommandType = @protocol.build("CommandType")
     @Command = @protocol.build("Command")
+    @DrawCommand = @protocol.build("Draw")
     @BoardCreateCommand = @protocol.build("BoardCreate")
 
   createCommand: (type) ->
@@ -11,6 +12,19 @@ class CommandGenerator
 
   generateJoin: ->
     this.createCommand(@CommandType.JOIN)
+
+  generateDraw: (pickedObject, drawState) ->
+    command = this.createCommand(@CommandType.DRAW)
+
+    # Picked object was a board
+    if pickedObject.object.__board?
+      board = pickedObject.object.__board
+      command.board_id = board.id
+      endStroke = drawState == U.DRAW_STATE_END
+      command.draw = new @DrawCommand(pickedObject.u, pickedObject.v, endStroke)
+      command
+    else
+      false
 
   generateCreateBoard: ->
     player = @root.controls.getObject()

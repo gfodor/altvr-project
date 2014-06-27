@@ -20,6 +20,7 @@
       this.PingCommand = this.protocol.build("Ping");
       this.CommandType = this.protocol.build("CommandType");
       this.pickedObject = null;
+      this.drawState = U.DRAW_STATE_NONE;
       this.scene = new t.Scene();
       this.camera = new t.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
       this.boards = [];
@@ -83,7 +84,7 @@
     };
 
     Root.prototype.render = function() {
-      var U, b1, b2, b3, delta, isects, obj, projector, ray, self, u, uv, v, vertices, _ref;
+      var U, b1, b2, b3, command, delta, isects, obj, pickedObject, projector, ray, self, u, uv, v, vertices, _ref;
       U = window.U;
       self = this;
       delta = this.clock.getDelta();
@@ -100,23 +101,34 @@
       this.renderer.render(this.scene, this.camera);
       this.pickedObject = null;
       if (isects.length > 0) {
-        obj = isects[0].object;
-        uv = obj.geometry.faceVertexUvs[0][isects[0].faceIndex];
-        vertices = _.map(["a", "b", "c"], function(faceName) {
-          var v;
-          v = new t.Vector3();
-          v.copy(obj.geometry.vertices[isects[0].face[faceName]]);
-          obj.localToWorld(v);
-          return v;
-        });
-        _ref = U.getBarycentricCoords(ray.ray, vertices[0], vertices[1], vertices[2]), b1 = _ref[0], b2 = _ref[1], b3 = _ref[2];
-        u = b1 * uv[0].x + b2 * uv[1].x + b3 * uv[2].x;
-        v = b1 * uv[0].y + b2 * uv[1].y + b3 * uv[2].y;
-        this.pickedObject = {
-          object: isects[0].object,
-          u: u,
-          v: 1.0 - v
-        };
+        if (this.drawState !== U.DRAW_STATE_NONE) {
+          obj = isects[0].object;
+          uv = obj.geometry.faceVertexUvs[0][isects[0].faceIndex];
+          vertices = _.map(["a", "b", "c"], function(faceName) {
+            var v;
+            v = new t.Vector3();
+            v.copy(obj.geometry.vertices[isects[0].face[faceName]]);
+            obj.localToWorld(v);
+            return v;
+          });
+          _ref = U.getBarycentricCoords(ray.ray, vertices[0], vertices[1], vertices[2]), b1 = _ref[0], b2 = _ref[1], b3 = _ref[2];
+          u = b1 * uv[0].x + b2 * uv[1].x + b3 * uv[2].x;
+          v = b1 * uv[0].y + b2 * uv[1].y + b3 * uv[2].y;
+          pickedObject = {
+            object: isects[0].object,
+            u: u,
+            v: 1.0 - v
+          };
+          command = this.commandGenerator.generateDraw(pickedObject, this.drawState);
+          if (command) {
+            this.commandPump.push(command, this.drawState !== U.DRAW_STATE_DURING);
+          }
+          if (this.drawState !== U.DRAW_STATE_END) {
+            this.drawState = U.DRAW_STATE_DURING;
+          } else {
+            this.drawState = U.DRAW_STATE_NONE;
+          }
+        }
         this.renderer.autoClear = false;
         return this.renderer.render(this.hud.scene, this.hud.camera);
       } else {
@@ -130,7 +142,16 @@
       $(document).keypress(function(e) {
         return _this.handleKeyPress(e.which);
       });
-      return $(document).mousedown(function() {});
+      $(document).mousedown(function() {
+        if (_this.isPointerLocked()) {
+          return _this.drawState = U.DRAW_STATE_START;
+        }
+      });
+      return $(document).mouseup(function() {
+        if (_this.drawState !== U.DRAW_STATE_NONE) {
+          return _this.drawState = U.DRAW_STATE_END;
+        }
+      });
     };
 
     Root.prototype.setupPointerLockHandler = function() {

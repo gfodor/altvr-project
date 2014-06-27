@@ -9,6 +9,7 @@ class Board
     @mesh.rotateOnAxis(axis, pitch)
     @mesh.rotateOnAxis(new t.Vector3(0,1,0), yaw)
     @mesh.position.copy(position)
+    @mesh.__board = this
     @canvas = document.createElement("canvas")
     aspectRatio = @height * 1.0 / (@width * 1.0)
     @canvas.width = 1024

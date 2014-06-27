@@ -2,6 +2,13 @@ t = THREE
 
 window.U = U = {}
 
+# 3-state flag for drawing, we force the event to the server on the first
+# and last draw just so the ends of the drawing are exact.
+U.DRAW_STATE_NONE = 0
+U.DRAW_STATE_START = 1
+U.DRAW_STATE_DURING = 2
+U.DRAW_STATE_END = 3
+
 # Determines if this command must round-trip to the server, or if it can
 # be fired immediatelly locally. Create board requires the server assign
 # the board an id, so there must be a round trip.

@@ -41,7 +41,7 @@ message BoardCreate {
 message Draw {
   required float x = 1;
   required float y = 2;
-  required bool last = 3;
+  required bool end_stroke = 3;
 }
 
 message Erase {
