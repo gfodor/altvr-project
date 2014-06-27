@@ -180,7 +180,7 @@
     Root.prototype.setupPointerLockHandler = function() {
       var pointerLockChangeHandler,
         _this = this;
-      $(document).mousedown(function() {
+      $("body").mousedown(function() {
         var element;
         if (!_this.isPointerLocked()) {
           element = $("body")[0];

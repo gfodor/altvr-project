@@ -155,7 +155,7 @@ class Root
       @drawState = U.DRAW_STATE_END unless @drawState == U.DRAW_STATE_NONE
 
   setupPointerLockHandler: ->
-    $(document).mousedown =>
+    $("body").mousedown =>
       unless this.isPointerLocked()
         element = $("body")[0]
         element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock
