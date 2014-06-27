@@ -92,7 +92,7 @@ class GameServer
       this.withRoomAndUserData command, (roomData, userData) =>
         # Adjust timestamp based upon latency
         if userData? && userData.latency?
-          command.timestamp += (new Date()).getTime() - userData.latency
+          command.timestamp = (new Date()).getTime() - userData.latency
 
         if command.board_id?
           board = this.boardDataForBoardId(command.board_id, roomData.roomId)
