@@ -16,7 +16,7 @@
       this.CommandType = this.protocol.build("CommandType");
     }
 
-    CommandHandler.prototype.executeCommand = function(command) {
+    CommandHandler.prototype.executeCommand = function(command, localExecution) {
       var board, board_id, height, pitch, width, x, y, yaw, z, _ref;
       switch (command.type) {
         case this.CommandType.BOARD_CREATE:
@@ -24,9 +24,22 @@
           board_id = command.board_id;
           board = new Board(board_id, width, height, new t.Vector3(x, y, z), yaw, pitch);
           board.addToScene(this.root.scene);
+          board.drawOn(function(ctx, width, height) {
+            ctx.fillStyle = "#FFFFFF";
+            return ctx.fillRect(0, 0, width, height);
+          });
           return this.root.addBoard(board);
         case this.CommandType.DRAW:
-          return console.log("draw: " + command.user_id + " " + command.board_id + " " + command.draw.x + " " + command.draw.y + " " + command.draw.end_stroke);
+          board = this.root.getBoard(command.board_id);
+          if (board) {
+            board.drawOn(function(ctx, width, height) {
+              ctx.fillStyle = "#FF0000";
+              return ctx.fillRect(Math.floor(command.draw.x * width), Math.floor(command.draw.y * height), 10, 10);
+            });
+            if (localExecution) {
+              return board.refresh();
+            }
+          }
       }
     };
 

@@ -49,10 +49,15 @@
       return scene.add(this.light);
     };
 
-    Board.prototype.draw = function(f) {
+    Board.prototype.drawOn = function(f) {
+      var ctx;
+      ctx = this.canvas.getContext('2d');
+      return f(ctx, this.canvas.width, this.canvas.height);
+    };
+
+    Board.prototype.refresh = function() {
       var ctx, image, texture;
       ctx = this.canvas.getContext('2d');
-      f(ctx, this.canvas.width, this.canvas.height);
       image = new Image();
       ctx.save();
       image.src = this.canvas.toDataURL();

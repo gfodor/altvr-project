@@ -23,6 +23,12 @@ class Root
   addBoard: (board) ->
     @boards.push(board)
 
+  getBoard: (boardId) ->
+    for board in @boards
+      return board if board.id == boardId
+
+    return null
+
   connect: ->
     @socket = new WebSocket("ws://altvr.lulcards.com:8001/ws")
     @socket.binaryType = "arraybuffer"
@@ -44,7 +50,11 @@ class Root
       commands = @Commands.decode e.data
 
       _.each commands.commands, (c) =>
+        # When bootstrapping up scene, do not regenerate texture on boards until end so it's not slow.
         this.processIncomingCommand c, commands.is_bootstrap
+
+      for board in @boards
+        board.refresh()
 
   processIncomingCommand: (command, isBootstrap) ->
     switch command.type
@@ -161,17 +171,5 @@ class Root
       when 98 # B, create board
         command = @commandGenerator.generateCreateBoard()
         @commandPump.push(command, true)
-
-#updateBoards = ->
-#  for board in boards
-#    board.draw (ctx, width, height) ->
-#      ctx.fillStyle = "#FFFFFF"
-#      ctx.fillRect(0, 0, width, height)
-#
-#      _.each clickedPoints, (point) ->
-#        ctx.fillStyle = "#FF0000"
-#        ctx.fillRect(Math.floor(point[0] * width), Math.floor(point[1] * height), 10, 10)
-#
-#updateBoards()
 
 window.Root = Root

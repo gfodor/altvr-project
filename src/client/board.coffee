@@ -35,13 +35,15 @@ class Board
     @light.position.add(norm)
     scene.add(@light)
 
-  draw: (f) ->
+  drawOn: (f) ->
     ctx = @canvas.getContext('2d')
     f(ctx, @canvas.width, @canvas.height)
+
+  refresh: ->
+    ctx = @canvas.getContext('2d')
     image = new Image()
     ctx.save()
     image.src = @canvas.toDataURL()
-
     texture = new t.Texture(image)
     texture.needsUpdate = true
     @material.setValues(map: texture)

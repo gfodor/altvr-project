@@ -5,9 +5,9 @@
   CommandPump = (function() {
     var ENQUEUE_RATE_LIMIT, FLUSH_RATE;
 
-    ENQUEUE_RATE_LIMIT = 25;
+    ENQUEUE_RATE_LIMIT = 50;
 
-    FLUSH_RATE = 250;
+    FLUSH_RATE = 500;
 
     function CommandPump(protocol, socket, handler) {
       var _this = this;
@@ -34,7 +34,7 @@
         this.lastEnqueueTime = now;
         this.pendingCommands.push(command);
         if (!U.requiresServerResponse(this.CommandType, command)) {
-          this.handler.executeCommand(command);
+          this.handler.executeCommand(command, true);
         }
       }
       if (force) {

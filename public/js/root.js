@@ -34,6 +34,18 @@
       return this.boards.push(board);
     };
 
+    Root.prototype.getBoard = function(boardId) {
+      var board, _i, _len, _ref;
+      _ref = this.boards;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        board = _ref[_i];
+        if (board.id === boardId) {
+          return board;
+        }
+      }
+      return null;
+    };
+
     Root.prototype.connect = function() {
       var _this = this;
       this.socket = new WebSocket("ws://altvr.lulcards.com:8001/ws");
@@ -52,11 +64,18 @@
         return console.log("Disconnect");
       };
       return this.socket.onmessage = function(e) {
-        var commands;
+        var board, commands, _i, _len, _ref, _results;
         commands = _this.Commands.decode(e.data);
-        return _.each(commands.commands, function(c) {
+        _.each(commands.commands, function(c) {
           return _this.processIncomingCommand(c, commands.is_bootstrap);
         });
+        _ref = _this.boards;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          board = _ref[_i];
+          _results.push(board.refresh());
+        }
+        return _results;
       };
     };
 

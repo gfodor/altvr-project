@@ -1,6 +1,6 @@
 class CommandPump
-  ENQUEUE_RATE_LIMIT = 25
-  FLUSH_RATE = 250
+  ENQUEUE_RATE_LIMIT = 50
+  FLUSH_RATE = 500
 
   constructor: (@protocol, @socket, @handler) ->
     @PingCommand = @protocol.build("Ping")
@@ -24,7 +24,7 @@ class CommandPump
       @pendingCommands.push command
 
       unless U.requiresServerResponse(@CommandType, command)
-        @handler.executeCommand command
+        @handler.executeCommand command, true
 
     if force
       this.flush()
