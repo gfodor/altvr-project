@@ -7,7 +7,7 @@
   Board = (function() {
 
     function Board(id, width, height, position, yaw, pitch) {
-      var aspectRatio;
+      var aspectRatio, axis;
       this.id = id;
       this.width = width;
       this.height = height;
@@ -16,9 +16,10 @@
         color: "#FFFFFF"
       });
       this.mesh = new t.Mesh(this.geometry, this.material);
-      this.mesh.position.copy(position);
+      axis = new t.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
+      this.mesh.rotateOnAxis(axis, pitch);
       this.mesh.rotateOnAxis(new t.Vector3(0, 1, 0), yaw);
-      this.mesh.rotateOnAxis(new t.Vector3(1, 0, 0), pitch);
+      this.mesh.position.copy(position);
       this.canvas = document.createElement("canvas");
       aspectRatio = this.height * 1.0 / (this.width * 1.0);
       this.canvas.width = 1024;

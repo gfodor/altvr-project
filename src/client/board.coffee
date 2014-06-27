@@ -5,9 +5,10 @@ class Board
     @geometry = new t.PlaneGeometry(@width, @height)
     @material = new t.MeshLambertMaterial( { color: "#FFFFFF" } )
     @mesh = new t.Mesh( @geometry, @material )
-    @mesh.position.copy(position)
+    axis = new t.Vector3(Math.cos(yaw),0,-Math.sin(yaw))
+    @mesh.rotateOnAxis(axis, pitch)
     @mesh.rotateOnAxis(new t.Vector3(0,1,0), yaw)
-    @mesh.rotateOnAxis(new t.Vector3(1,0,0), pitch)
+    @mesh.position.copy(position)
     @canvas = document.createElement("canvas")
     aspectRatio = @height * 1.0 / (@width * 1.0)
     @canvas.width = 1024

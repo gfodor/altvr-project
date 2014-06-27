@@ -22,6 +22,6 @@
 
   room.addToScene(root.scene);
 
-  root.renderLoop();
+  root.render();
 
 }).call(this);

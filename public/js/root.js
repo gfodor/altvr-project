@@ -18,7 +18,6 @@
       this.Commands = this.protocol.build("Commands");
       this.Command = this.protocol.build("Command");
       this.PingCommand = this.protocol.build("Ping");
-      this.BoardCreateCommand = this.protocol.build("BoardCreate");
       this.CommandType = this.protocol.build("CommandType");
       this.pickedObject = null;
       this.scene = new t.Scene();
@@ -41,10 +40,11 @@
       window.pp = this.protocol;
       this.commandHandler = new CommandHandler(this);
       this.commandPump = new CommandPump(this.protocol, this.socket, this.commandHandler);
+      this.commandGenerator = new CommandGenerator(this, this.protocol);
       this.socket.onopen = function() {
         var joinCommand;
         console.log("Connect");
-        joinCommand = _this.createCommand(_this.CommandType.JOIN);
+        joinCommand = _this.commandGenerator.generateJoin();
         return _this.commandPump._send([joinCommand]);
       };
       this.socket.onclose = function() {
@@ -82,7 +82,7 @@
       return this.commandPump._send([pong]);
     };
 
-    Root.prototype.renderLoop = function() {
+    Root.prototype.render = function() {
       var U, b1, b2, b3, delta, isects, obj, projector, ray, self, u, uv, v, vertices, _ref;
       U = window.U;
       self = this;
@@ -94,7 +94,7 @@
         return b.mesh;
       }), false);
       requestAnimationFrame((function() {
-        return self.renderLoop();
+        return self.render();
       }));
       this.renderer.autoClear = true;
       this.renderer.render(this.scene, this.camera);
@@ -158,30 +158,13 @@
       return document.pointerLockElement === el || document.mozPointerLockElement === el || document.webkitPointerLockElement === el;
     };
 
-    Root.prototype.pushCreateBoardCommand = function() {
-      var command;
-      console.log("create board");
-      command = this.createCommand(this.CommandType.BOARD_CREATE);
-      command.board_create = new this.BoardCreateCommand();
-      command.board_create.width = 13;
-      command.board_create.height = 8;
-      command.board_create.x = this.controls.getObject().position.x;
-      command.board_create.y = this.controls.getObject().position.y;
-      command.board_create.z = this.controls.getObject().position.z;
-      command.board_create.pitch = 0.1;
-      command.board_create.yaw = 0.1;
-      return this.commandPump.push(command, true);
-    };
-
     Root.prototype.handleKeyPress = function(keyCode) {
+      var command;
       switch (keyCode) {
         case 98:
-          return this.pushCreateBoardCommand();
+          command = this.commandGenerator.generateCreateBoard();
+          return this.commandPump.push(command, true);
       }
-    };
-
-    Root.prototype.createCommand = function(type) {
-      return new this.Command(type, this.userId, (new Date()).getTime(), this.roomId);
     };
 
     return Root;

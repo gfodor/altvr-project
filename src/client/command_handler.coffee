@@ -13,8 +13,7 @@ class CommandHandler
         {width, height, x, y, z, pitch, yaw} = command.board_create
         board_id = command.board_id
 
-        console.log("create board #{board_id}")
-        board = new Board(board_id, width, height, new t.Vector3(x, y, z), pitch, yaw)
+        board = new Board(board_id, width, height, new t.Vector3(x, y, z), yaw, pitch)
         board.addToScene(@root.scene)
         @root.addBoard(board)
 

@@ -22,4 +22,4 @@ room.addToScene(root.scene)
 #board.addToScene(root.scene)
 #root.addBoard(board)
 
-root.renderLoop()
+root.render()

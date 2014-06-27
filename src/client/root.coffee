@@ -8,7 +8,6 @@ class Root
     @Commands = @protocol.build("Commands")
     @Command = @protocol.build("Command")
     @PingCommand = @protocol.build("Ping")
-    @BoardCreateCommand = @protocol.build("BoardCreate")
     @CommandType = @protocol.build("CommandType")
 
     @pickedObject = null
@@ -30,10 +29,11 @@ class Root
 
     @commandHandler = new CommandHandler(this)
     @commandPump = new CommandPump(@protocol, @socket, @commandHandler)
+    @commandGenerator = new CommandGenerator(this, @protocol)
 
     @socket.onopen = =>
       console.log("Connect")
-      joinCommand = this.createCommand(@CommandType.JOIN)
+      joinCommand = @commandGenerator.generateJoin()
       @commandPump._send([joinCommand])
 
     @socket.onclose = =>
@@ -68,7 +68,7 @@ class Root
     console.log "PING #{command.timestamp}"
     @commandPump._send([pong])
 
-  renderLoop: () ->
+  render: () ->
     U = window.U
     self = this
     delta = @clock.getDelta()
@@ -78,7 +78,7 @@ class Root
     ray = projector.pickingRay(new t.Vector3(0.0, 0.0, 0.0), @camera)
     isects = ray.intersectObjects((_.map @boards, (b) -> b.mesh), false)
 
-    requestAnimationFrame((-> self.renderLoop()))
+    requestAnimationFrame((-> self.render()))
 
     @renderer.autoClear = true
     @renderer.render(@scene, @camera)
@@ -137,28 +137,11 @@ class Root
     el = $("body")[0]
     document.pointerLockElement == el || document.mozPointerLockElement == el || document.webkitPointerLockElement == el
 
-  pushCreateBoardCommand: ->
-    console.log("create board")
-    command = this.createCommand(@CommandType.BOARD_CREATE)
-    command.board_create = new @BoardCreateCommand()
-    command.board_create.width = 13
-    command.board_create.height = 8
-    command.board_create.x = @controls.getObject().position.x
-    command.board_create.y = @controls.getObject().position.y
-    command.board_create.z = @controls.getObject().position.z
-    command.board_create.pitch = 0.1
-    command.board_create.yaw = 0.1
-    @commandPump.push(command, true)
-
   handleKeyPress: (keyCode) ->
     switch keyCode
       when 98 # B, create board
-        this.pushCreateBoardCommand()
-
-#board = new Board(13, 8, new t.Vector3(0, 12, -10), 0.1, 0.0)
-
-  createCommand: (type) ->
-    new @Command(type, @userId, (new Date()).getTime(), @roomId)
+        command = @commandGenerator.generateCreateBoard()
+        @commandPump.push(command, true)
 
 #updateBoards = ->
 #  for board in boards

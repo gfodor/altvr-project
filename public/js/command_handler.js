@@ -22,8 +22,7 @@
         case this.CommandType.BOARD_CREATE:
           _ref = command.board_create, width = _ref.width, height = _ref.height, x = _ref.x, y = _ref.y, z = _ref.z, pitch = _ref.pitch, yaw = _ref.yaw;
           board_id = command.board_id;
-          console.log("create board " + board_id);
-          board = new Board(board_id, width, height, new t.Vector3(x, y, z), pitch, yaw);
+          board = new Board(board_id, width, height, new t.Vector3(x, y, z), yaw, pitch);
           board.addToScene(this.root.scene);
           return this.root.addBoard(board);
       }
