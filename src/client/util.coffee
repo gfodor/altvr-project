@@ -16,6 +16,8 @@ U.requiresServerResponse = (commandType, command) ->
   return true if command.type == commandType.BOARD_CREATE
   return false
 
+# Given a ray and three triangle vertices, determine barycentric coords.
+# Adapted from "Physically Based Rendering" by Pharr & Humphreys
 U.getBarycentricCoords = (ray, p0, p1, p2) ->
   e1 = new t.Vector3()
   e1.subVectors(p1, p0)

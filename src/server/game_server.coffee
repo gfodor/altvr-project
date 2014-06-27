@@ -8,6 +8,14 @@ ws = require "ws"
 sys = require "sys"
 ProtoBuf = require "protobufjs"
 
+# The game server provides basic room facilities:
+#   - Keeps state of all the boards in the room and the commands which have
+#   been executed on them.
+#
+#   - Keeps presence of users in the room.
+#
+#   - Broadcasts new commands in batch to room members as they come in.
+
 class GameServer
   constructor: ->
     @protocol = ProtoBuf.loadProtoFile("public/protocol.proto")

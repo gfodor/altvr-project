@@ -1,5 +1,6 @@
 t = THREE
 
+# Helper class for generating commands. j4
 class CommandGenerator
   constructor: (@root, @protocol) ->
     @CommandType = @protocol.build("CommandType")
@@ -21,6 +22,7 @@ class CommandGenerator
 
     # Picked object was a board
     if pickedObject.object.__board?
+      # Draw command has boolean determining if this was the last point.
       board = pickedObject.object.__board
       command.board_id = board.id
       endStroke = drawState == U.DRAW_STATE_END
@@ -37,9 +39,14 @@ class CommandGenerator
     command.board_create.width = 13
     command.board_create.height = 8
 
+    # To determine the new board's position & orientation, we place it a few
+    # units away from the camera in the direction of the camera's normal.
+    #
+    # We also orient it so it is facing towards the user.
     boardPosition = new t.Vector3()
-    boardPosition.copy(player.position)
 
+    # Position is camera position + nudge in direction of ray casted from eye
+    boardPosition.copy(player.position)
     projector = new t.Projector()
     @root.camera.updateMatrixWorld()
     ray = projector.pickingRay(new t.Vector3(0.0, 0.0, 0.0), @root.camera)
@@ -52,6 +59,7 @@ class CommandGenerator
     command.board_create.y = boardPosition.y
     command.board_create.z = boardPosition.z
 
+    # Copy the pitch and yaw
     pitch = @root.controls.getPitchObject().rotation.x
     yaw = @root.controls.getYawObject().rotation.y
 

@@ -1,5 +1,6 @@
 t = THREE
 
+# The HUD just shows a small reticle with the currently active draw color.
 class HUD
   constructor: (@protocol) ->
     @scene = new t.Scene()

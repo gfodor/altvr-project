@@ -1,5 +1,7 @@
 t = THREE
 
+# General purpose root class. Provides the rendering loop, event
+# handling, pointer locking, and provides access to all the boards in the game space.
 class Root
   constructor: (@protocol, @renderer, @hud, @userId, @roomId) ->
     @Commands = @protocol.build("Commands")

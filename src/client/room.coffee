@@ -1,5 +1,6 @@
 t = THREE
 
+# Represents the room, draws the floor and ambient lighting.
 class Room
   constructor: (scene) ->
     @light = new t.AmbientLight(0x606060)

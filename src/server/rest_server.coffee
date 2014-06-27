@@ -4,15 +4,7 @@ fs = require "fs"
 url = require "url"
 _ = require "lodash"
 
-#PhorkWriter = require '../../lib/phork_writer'
-
 module.exports = app = express()
-
-#temp.track()
-
-#app.use express.urlencoded()
-#app.use express.json()
-#app.use express.compress()
 
 app.use "/", express.static("public")
 app.set 'view engine', 'jade'
@@ -26,8 +18,8 @@ genId = ->
 
 app.get "/", (req, res) ->
   # Generate a 64-bit room id for the room key, and redirect.
-  #roomKey = hat 64, 36
-  roomKey = hat 5, 36
+  roomKey = hat 64, 36
+  #roomKey = hat 5, 36
   res.redirect "/rooms/#{roomKey}"
 
 app.get "/rooms/:room_key", (req, res) ->

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+// Kicks off the REST and game server
+
 require("coffee-script");
 
 var sys = require('sys'),
