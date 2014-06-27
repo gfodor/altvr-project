@@ -6,19 +6,41 @@
 
   HUD = (function() {
 
-    function HUD() {
-      var material;
+    function HUD(protocol) {
+      this.protocol = protocol;
       this.scene = new t.Scene();
       this.camera = new t.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 1000);
       this.scene.add(this.camera);
-      material = new t.MeshBasicMaterial({
+      this.material = new t.MeshBasicMaterial({
         color: "#00FF00"
       });
-      this.reticle = new t.Mesh(new t.PlaneGeometry(5, 5), material);
+      this.reticle = new t.Mesh(new t.PlaneGeometry(5, 5), this.material);
       this.reticle.position.z = -10;
       this.scene.add(this.reticle);
       this.scene.add(this.camera);
+      this.Color = this.protocol.build("Color");
     }
+
+    HUD.prototype.setReticleColor = function(color) {
+      switch (color) {
+        case this.Color.RED:
+          return this.material.setValues({
+            color: "#FF0000"
+          });
+        case this.Color.BLUE:
+          return this.material.setValues({
+            color: "#0000FF"
+          });
+        case this.Color.GREEN:
+          return this.material.setValues({
+            color: "#00FF00"
+          });
+        default:
+          return this.material.setValues({
+            color: "#000000"
+          });
+      }
+    };
 
     return HUD;
 

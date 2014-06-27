@@ -4,8 +4,10 @@ renderer = new t.WebGLRenderer()
 renderer.setSize( window.innerWidth, window.innerHeight )
 document.body.appendChild( renderer.domElement )
 
-hud = new HUD()
-root = new Root(renderer, hud, window._userId, window._roomId)
+protocol = dcodeIO.ProtoBuf.loadProtoFile("/protocol.proto")
+
+hud = new HUD(protocol)
+root = new Root(protocol, renderer, hud, window._userId, window._roomId)
 root.attachEvents()
 root.connect()
 

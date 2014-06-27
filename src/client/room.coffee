@@ -4,7 +4,7 @@ class Room
   constructor: (scene) ->
     @light = new t.AmbientLight(0x606060)
 
-    material = new t.MeshLambertMaterial( { map: t.ImageUtils.loadTexture("/images/doge.jpeg") } )
+    material = new t.MeshLambertMaterial( { map: t.ImageUtils.loadTexture("/images/wood.jpg") } )
     @floor = new t.Mesh( new t.PlaneGeometry(100,100), material )
     @floor.rotateOnAxis(new t.Vector3(1,0,0), - Math.PI / 2.0)
 

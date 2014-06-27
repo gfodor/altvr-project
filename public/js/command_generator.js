@@ -23,14 +23,18 @@
       return this.createCommand(this.CommandType.JOIN);
     };
 
-    CommandGenerator.prototype.generateDraw = function(pickedObject, drawState) {
+    CommandGenerator.prototype.generateErase = function() {
+      return this.createCommand(this.CommandType.ERASE);
+    };
+
+    CommandGenerator.prototype.generateDraw = function(pickedObject, drawState, drawColor) {
       var board, command, endStroke;
       command = this.createCommand(this.CommandType.DRAW);
       if (pickedObject.object.__board != null) {
         board = pickedObject.object.__board;
         command.board_id = board.id;
         endStroke = drawState === U.DRAW_STATE_END;
-        command.draw = new this.DrawCommand(pickedObject.u, pickedObject.v, endStroke);
+        command.draw = new this.DrawCommand(pickedObject.u, pickedObject.v, drawColor, endStroke);
         return command;
       } else {
         return false;

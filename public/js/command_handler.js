@@ -13,11 +13,14 @@
       this.root = root;
       this.protocol = protocol;
       this.protocol = ProtoBuf.loadProtoFile("/protocol.proto");
+      this.strokeBuffer = {};
       this.CommandType = this.protocol.build("CommandType");
+      this.Color = this.protocol.build("Color");
     }
 
     CommandHandler.prototype.executeCommand = function(command, localExecution) {
-      var board, board_id, height, pitch, width, x, y, yaw, z, _ref;
+      var board, boardId, board_id, height, pitch, points, userId, width, x, y, yaw, z, _base, _base1, _ref, _ref1, _ref2,
+        _this = this;
       switch (command.type) {
         case this.CommandType.BOARD_CREATE:
           _ref = command.board_create, width = _ref.width, height = _ref.height, x = _ref.x, y = _ref.y, z = _ref.z, pitch = _ref.pitch, yaw = _ref.yaw;
@@ -29,13 +32,61 @@
             return ctx.fillRect(0, 0, width, height);
           });
           return this.root.addBoard(board);
-        case this.CommandType.DRAW:
+        case this.CommandType.ERASE:
           board = this.root.getBoard(command.board_id);
           if (board) {
             board.drawOn(function(ctx, width, height) {
-              ctx.fillStyle = "#FF0000";
-              return ctx.fillRect(Math.floor(command.draw.x * width), Math.floor(command.draw.y * height), 10, 10);
+              ctx.fillStyle = "#FFFFFF";
+              return ctx.fillRect(0, 0, width, height);
             });
+            return board.refresh();
+          }
+          break;
+        case this.CommandType.DRAW:
+          board = this.root.getBoard(command.board_id);
+          if (board) {
+            userId = command.user_id;
+            boardId = command.board_id;
+            if ((_ref1 = (_base = this.strokeBuffer)[userId]) == null) {
+              _base[userId] = {};
+            }
+            if ((_ref2 = (_base1 = this.strokeBuffer[userId])[boardId]) == null) {
+              _base1[boardId] = [];
+            }
+            this.strokeBuffer[userId][boardId].push([command.draw.x, command.draw.y]);
+            points = this.strokeBuffer[userId][boardId];
+            if (points.length === 3 || command.draw.end_stroke) {
+              if (command.draw.end_stroke) {
+                this.strokeBuffer[userId][boardId] = [];
+              } else {
+                this.strokeBuffer[userId][boardId] = [points[points.length - 1]];
+                board.drawOn(function(ctx, width, height) {
+                  var midX, midY;
+                  ctx.lineWidth = 4;
+                  switch (command.draw.color) {
+                    case _this.Color.RED:
+                      ctx.strokeStyle = "#FF0000";
+                      break;
+                    case _this.Color.GREEN:
+                      ctx.strokeStyle = "#00FF00";
+                      break;
+                    case _this.Color.BLUE:
+                      ctx.strokeStyle = "#0000FF";
+                      break;
+                    default:
+                      ctx.strokeStyle = "#000000";
+                  }
+                  ctx.beginPath();
+                  if (points.length === 3) {
+                    midX = (points[1][0] + points[2][0]) / 2;
+                    midY = (points[1][1] + points[2][1]) / 2;
+                    ctx.moveTo(Math.floor(points[0][0] * width), Math.floor(points[0][1] * height));
+                    ctx.quadraticCurveTo(Math.floor(midX * width), Math.floor(midY * height), Math.floor(points[2][0] * width), Math.floor(points[2][1] * height));
+                  }
+                  return ctx.stroke();
+                });
+              }
+            }
             if (localExecution) {
               return board.refresh();
             }

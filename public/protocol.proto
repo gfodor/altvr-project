@@ -11,6 +11,13 @@ enum CommandType {
   PING = 4;
 }
 
+enum Color {
+  BLACK = 0;
+  RED = 1;
+  GREEN = 2;
+  BLUE = 3;
+}
+
 message Command {
   required CommandType type = 1;
   required uint32 user_id = 2;
@@ -41,7 +48,8 @@ message BoardCreate {
 message Draw {
   required float x = 1;
   required float y = 2;
-  required bool end_stroke = 3;
+  required Color color = 3;
+  required bool end_stroke = 4;
 }
 
 message Erase {

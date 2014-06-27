@@ -13,7 +13,10 @@ class CommandGenerator
   generateJoin: ->
     this.createCommand(@CommandType.JOIN)
 
-  generateDraw: (pickedObject, drawState) ->
+  generateErase: ->
+    this.createCommand(@CommandType.ERASE)
+
+  generateDraw: (pickedObject, drawState, drawColor) ->
     command = this.createCommand(@CommandType.DRAW)
 
     # Picked object was a board
@@ -21,7 +24,7 @@ class CommandGenerator
       board = pickedObject.object.__board
       command.board_id = board.id
       endStroke = drawState == U.DRAW_STATE_END
-      command.draw = new @DrawCommand(pickedObject.u, pickedObject.v, endStroke)
+      command.draw = new @DrawCommand(pickedObject.u, pickedObject.v, drawColor, endStroke)
       command
     else
       false

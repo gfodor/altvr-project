@@ -1,14 +1,12 @@
 t = THREE
 
 class Root
-  ProtoBuf = dcodeIO.ProtoBuf
-
-  constructor: (@renderer, @hud, @userId, @roomId) ->
-    @protocol = ProtoBuf.loadProtoFile("/protocol.proto")
+  constructor: (@protocol, @renderer, @hud, @userId, @roomId) ->
     @Commands = @protocol.build("Commands")
     @Command = @protocol.build("Command")
     @PingCommand = @protocol.build("Ping")
     @CommandType = @protocol.build("CommandType")
+    @Color = @protocol.build("Color")
 
     @pickedObject = null
     @drawState = U.DRAW_STATE_NONE
@@ -19,6 +17,7 @@ class Root
     @controls = new t.PointerLockControls(@camera)
     @controls.enabled = false
     @scene.add(@controls.getObject())
+    this.setDrawColor(@Color.BLACK)
 
   addBoard: (board) ->
     @boards.push(board)
@@ -28,6 +27,10 @@ class Root
       return board if board.id == boardId
 
     return null
+
+  setDrawColor: (drawColor) ->
+    @drawColor = drawColor
+    @hud.setReticleColor(@drawColor)
 
   connect: ->
     @socket = new WebSocket("ws://altvr.lulcards.com:8001/ws")
@@ -96,31 +99,31 @@ class Root
     @pickedObject = null
 
     if isects.length > 0
+      # Determine u,v coordinates by finding barycentric triangle coords
+      # and then interpolating the u,v at the vertices
+      #
+      # The (u,-v) coordinate is the (x,y) coordinate on the canvas to draw
+      # and is what we record to the server.
+      obj = isects[0].object
+      uv = obj.geometry.faceVertexUvs[0][isects[0].faceIndex]
+
+      vertices = _.map ["a", "b", "c"], (faceName) ->
+        v = new t.Vector3()
+        v.copy(obj.geometry.vertices[isects[0].face[faceName]])
+        obj.localToWorld(v)
+        v
+
+      [b1, b2, b3] = U.getBarycentricCoords(ray.ray, vertices[0], vertices[1], vertices[2])
+      u = b1 * uv[0].x + b2 * uv[1].x + b3 * uv[2].x
+      v = b1 * uv[0].y + b2 * uv[1].y + b3 * uv[2].y
+
+      @pickedObject =
+        object: isects[0].object
+        u: u,
+        v: 1.0 - v
+
       if @drawState != U.DRAW_STATE_NONE
-        # Determine u,v coordinates by finding barycentric triangle coords
-        # and then interpolating the u,v at the vertices
-        #
-        # The (u,-v) coordinate is the (x,y) coordinate on the canvas to draw
-        # and is what we record to the server.
-        obj = isects[0].object
-        uv = obj.geometry.faceVertexUvs[0][isects[0].faceIndex]
-
-        vertices = _.map ["a", "b", "c"], (faceName) ->
-          v = new t.Vector3()
-          v.copy(obj.geometry.vertices[isects[0].face[faceName]])
-          obj.localToWorld(v)
-          v
-
-        [b1, b2, b3] = U.getBarycentricCoords(ray.ray, vertices[0], vertices[1], vertices[2])
-        u = b1 * uv[0].x + b2 * uv[1].x + b3 * uv[2].x
-        v = b1 * uv[0].y + b2 * uv[1].y + b3 * uv[2].y
-
-        pickedObject =
-          object: isects[0].object
-          u: u,
-          v: 1.0 - v
-
-        command = @commandGenerator.generateDraw(pickedObject, @drawState)
+        command = @commandGenerator.generateDraw(@pickedObject, @drawState, @drawColor)
 
         if command
           # Force the command to the server unless we're in mid-stroke
@@ -171,5 +174,17 @@ class Root
       when 98 # B, create board
         command = @commandGenerator.generateCreateBoard()
         @commandPump.push(command, true)
+      when 99 # C, rotate color
+        colors = [@Color.BLACK, @Color.RED, @Color.GREEN, @Color.BLUE]
+        newDrawColor = colors[(_.indexOf(colors, @drawColor) + 1) % colors.length]
+        this.setDrawColor(newDrawColor)
+      when 101 # E, erase board
+        console.log "hi"
+        if @pickedObject && @pickedObject.object.__board?
+          console.log @pickedObject
+          command = @commandGenerator.generateErase()
+          board = @pickedObject.object.__board
+          command.board_id = board.id
+          @commandPump.push(command, true)
 
 window.Root = Root

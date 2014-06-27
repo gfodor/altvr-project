@@ -10,7 +10,7 @@
       var material;
       this.light = new t.AmbientLight(0x606060);
       material = new t.MeshLambertMaterial({
-        map: t.ImageUtils.loadTexture("/images/doge.jpeg")
+        map: t.ImageUtils.loadTexture("/images/wood.jpg")
       });
       this.floor = new t.Mesh(new t.PlaneGeometry(100, 100), material);
       this.floor.rotateOnAxis(new t.Vector3(1, 0, 0), -Math.PI / 2.0);

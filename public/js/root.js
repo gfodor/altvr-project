@@ -5,20 +5,18 @@
   t = THREE;
 
   Root = (function() {
-    var ProtoBuf;
 
-    ProtoBuf = dcodeIO.ProtoBuf;
-
-    function Root(renderer, hud, userId, roomId) {
+    function Root(protocol, renderer, hud, userId, roomId) {
+      this.protocol = protocol;
       this.renderer = renderer;
       this.hud = hud;
       this.userId = userId;
       this.roomId = roomId;
-      this.protocol = ProtoBuf.loadProtoFile("/protocol.proto");
       this.Commands = this.protocol.build("Commands");
       this.Command = this.protocol.build("Command");
       this.PingCommand = this.protocol.build("Ping");
       this.CommandType = this.protocol.build("CommandType");
+      this.Color = this.protocol.build("Color");
       this.pickedObject = null;
       this.drawState = U.DRAW_STATE_NONE;
       this.scene = new t.Scene();
@@ -28,6 +26,7 @@
       this.controls = new t.PointerLockControls(this.camera);
       this.controls.enabled = false;
       this.scene.add(this.controls.getObject());
+      this.setDrawColor(this.Color.BLACK);
     }
 
     Root.prototype.addBoard = function(board) {
@@ -44,6 +43,11 @@
         }
       }
       return null;
+    };
+
+    Root.prototype.setDrawColor = function(drawColor) {
+      this.drawColor = drawColor;
+      return this.hud.setReticleColor(this.drawColor);
     };
 
     Root.prototype.connect = function() {
@@ -103,7 +107,7 @@
     };
 
     Root.prototype.render = function() {
-      var U, b1, b2, b3, command, delta, isects, obj, pickedObject, projector, ray, self, u, uv, v, vertices, _ref;
+      var U, b1, b2, b3, command, delta, isects, obj, projector, ray, self, u, uv, v, vertices, _ref;
       U = window.U;
       self = this;
       delta = this.clock.getDelta();
@@ -120,25 +124,25 @@
       this.renderer.render(this.scene, this.camera);
       this.pickedObject = null;
       if (isects.length > 0) {
+        obj = isects[0].object;
+        uv = obj.geometry.faceVertexUvs[0][isects[0].faceIndex];
+        vertices = _.map(["a", "b", "c"], function(faceName) {
+          var v;
+          v = new t.Vector3();
+          v.copy(obj.geometry.vertices[isects[0].face[faceName]]);
+          obj.localToWorld(v);
+          return v;
+        });
+        _ref = U.getBarycentricCoords(ray.ray, vertices[0], vertices[1], vertices[2]), b1 = _ref[0], b2 = _ref[1], b3 = _ref[2];
+        u = b1 * uv[0].x + b2 * uv[1].x + b3 * uv[2].x;
+        v = b1 * uv[0].y + b2 * uv[1].y + b3 * uv[2].y;
+        this.pickedObject = {
+          object: isects[0].object,
+          u: u,
+          v: 1.0 - v
+        };
         if (this.drawState !== U.DRAW_STATE_NONE) {
-          obj = isects[0].object;
-          uv = obj.geometry.faceVertexUvs[0][isects[0].faceIndex];
-          vertices = _.map(["a", "b", "c"], function(faceName) {
-            var v;
-            v = new t.Vector3();
-            v.copy(obj.geometry.vertices[isects[0].face[faceName]]);
-            obj.localToWorld(v);
-            return v;
-          });
-          _ref = U.getBarycentricCoords(ray.ray, vertices[0], vertices[1], vertices[2]), b1 = _ref[0], b2 = _ref[1], b3 = _ref[2];
-          u = b1 * uv[0].x + b2 * uv[1].x + b3 * uv[2].x;
-          v = b1 * uv[0].y + b2 * uv[1].y + b3 * uv[2].y;
-          pickedObject = {
-            object: isects[0].object,
-            u: u,
-            v: 1.0 - v
-          };
-          command = this.commandGenerator.generateDraw(pickedObject, this.drawState);
+          command = this.commandGenerator.generateDraw(this.pickedObject, this.drawState, this.drawColor);
           if (command) {
             this.commandPump.push(command, this.drawState !== U.DRAW_STATE_DURING);
           }
@@ -199,11 +203,24 @@
     };
 
     Root.prototype.handleKeyPress = function(keyCode) {
-      var command;
+      var board, colors, command, newDrawColor;
       switch (keyCode) {
         case 98:
           command = this.commandGenerator.generateCreateBoard();
           return this.commandPump.push(command, true);
+        case 99:
+          colors = [this.Color.BLACK, this.Color.RED, this.Color.GREEN, this.Color.BLUE];
+          newDrawColor = colors[(_.indexOf(colors, this.drawColor) + 1) % colors.length];
+          return this.setDrawColor(newDrawColor);
+        case 101:
+          console.log("hi");
+          if (this.pickedObject && (this.pickedObject.object.__board != null)) {
+            console.log(this.pickedObject);
+            command = this.commandGenerator.generateErase();
+            board = this.pickedObject.object.__board;
+            command.board_id = board.id;
+            return this.commandPump.push(command, true);
+          }
       }
     };
 
