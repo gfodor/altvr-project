@@ -181,9 +181,7 @@ class Root
         newDrawColor = colors[(_.indexOf(colors, @drawColor) + 1) % colors.length]
         this.setDrawColor(newDrawColor)
       when 101 # E, erase board
-        console.log "hi"
         if @pickedObject && @pickedObject.object.__board?
-          console.log @pickedObject
           command = @commandGenerator.generateErase()
           board = @pickedObject.object.__board
           command.board_id = board.id

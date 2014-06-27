@@ -213,9 +213,7 @@
           newDrawColor = colors[(_.indexOf(colors, this.drawColor) + 1) % colors.length];
           return this.setDrawColor(newDrawColor);
         case 101:
-          console.log("hi");
           if (this.pickedObject && (this.pickedObject.object.__board != null)) {
-            console.log(this.pickedObject);
             command = this.commandGenerator.generateErase();
             board = this.pickedObject.object.__board;
             command.board_id = board.id;
