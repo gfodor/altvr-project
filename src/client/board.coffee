@@ -60,7 +60,7 @@ class Board
     norm.copy(@geometry.faces[0].normal)
     @mesh.updateMatrixWorld()
 
-    # Transform the normal of the plane and then push the light along it.
+    # Transform the normal of the plane and then push the target along it.
     normalMatrix = new t.Matrix3()
     normalMatrix.getNormalMatrix(@mesh.matrixWorld)
     norm.applyMatrix3(normalMatrix)
@@ -77,7 +77,6 @@ class Board
   # Performance intensive, run after finished updating the canvas.
   refresh: ->
     ctx = @canvas.getContext('2d')
-    image = new Image()
     ctx.save()
     texture = new t.Texture(ctx.getImageData(0, 0, @canvas.width, @canvas.height))
     texture.needsUpdate = true
