@@ -23,17 +23,28 @@
     };
 
     CommandGenerator.prototype.generateCreateBoard = function() {
-      var command, player;
+      var boardPosition, command, nudge, pitch, player, projector, ray, yaw;
       player = this.root.controls.getObject();
       command = this.createCommand(this.CommandType.BOARD_CREATE);
       command.board_create = new this.BoardCreateCommand();
       command.board_create.width = 13;
       command.board_create.height = 8;
-      command.board_create.x = player.position.x;
-      command.board_create.y = player.position.y;
-      command.board_create.z = player.position.z;
-      command.board_create.pitch = this.root.controls.getPitchObject().rotation.x;
-      command.board_create.yaw = this.root.controls.getYawObject().rotation.y;
+      boardPosition = new t.Vector3();
+      boardPosition.copy(player.position);
+      projector = new t.Projector();
+      this.root.camera.updateMatrixWorld();
+      ray = projector.pickingRay(new t.Vector3(0.0, 0.0, 0.0), this.root.camera);
+      nudge = new t.Vector3();
+      nudge.copy(ray.ray.direction);
+      nudge.multiplyScalar(10.0);
+      boardPosition.add(nudge);
+      command.board_create.x = boardPosition.x;
+      command.board_create.y = boardPosition.y;
+      command.board_create.z = boardPosition.z;
+      pitch = this.root.controls.getPitchObject().rotation.x;
+      yaw = this.root.controls.getYawObject().rotation.y;
+      command.board_create.pitch = pitch;
+      command.board_create.yaw = yaw;
       return command;
     };
 

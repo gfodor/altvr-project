@@ -26,7 +26,8 @@ genId = ->
 
 app.get "/", (req, res) ->
   # Generate a 64-bit room id for the room key, and redirect.
-  roomKey = hat 64, 36
+  #roomKey = hat 64, 36
+  roomKey = hat 5, 36
   res.redirect "/rooms/#{roomKey}"
 
 app.get "/rooms/:room_key", (req, res) ->
